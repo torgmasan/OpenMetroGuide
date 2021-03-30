@@ -1,10 +1,11 @@
 """This file contains the station class which serves as the vertex
 for the OMG graph."""
 from __future__ import annotations
-from typing import Tuple, Union
+
+from typing import Union
 
 
-class Station:
+class Node:
     """A class for the vertices of the graph that provide the necessary
     information of a station.
 
@@ -27,14 +28,13 @@ class Station:
     final_score: float
     colors: set[str]
     _is_station: bool
-    from_node: Union[str, Station]  # Want to keep name or the vertex itself?
-    neighbouring_stations: dict[Station, float]  # same as below, not sure whether Track attribute or here.
-    coordinates: Tuple[float, float]  # not sure whether this belongs here as it is only gonna be
-    # used for calculating the direct distance.
+    from_node: Union[str, Node]  # Want to keep name or the vertex itself?
+    neighbouring_stations: dict[Node, float]  # same as below, not sure whether Track attribute or here.
+    coordinates: tuple[float, float]
 
     def __init__(self, station_name: str, destination_distance: float, final_score: float,
-                 previous_node: Union[str, Station], neighbours: set[Station],
-                 coordinates: Tuple[float, float]) -> None:
+                 previous_node: Union[str, Node], neighbours: set[Node],
+                 coordinates: tuple[float, float]) -> None:
         """Initialize a new Station object."""
         self.name = station_name
         self.destination_distance = destination_distance
@@ -48,21 +48,3 @@ class Station:
         to this current vertex."""
         return len(self.neighbouring_stations)
 
-
-class Map:
-    """Represents the graph of the map where the calculation to find the shortest/cheapest route
-    will take place.
-    """
-    # Instance Attributes:
-    #   - _stations: A collection of stations in this Map. Maps station name to Station instance.
-    #   - _tracks: A collection of tracks in this Map. ...
-
-    _stations: dict[str, Station]
-    _tracks: ...
-
-    def __init__(self) -> None:
-        """Initializes an empty transit(metro) map without any stations or tracks."""
-        self._stations = {}
-        self._tracks = ...
-
-    def
