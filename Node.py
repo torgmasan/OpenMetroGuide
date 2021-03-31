@@ -1,9 +1,9 @@
 """This file contains the station class which serves as the vertex
-for the OMG graph."""
+for the OpenMetroGuide graph."""
 from __future__ import annotations
 
 
-class Node:
+class _Node:
     """A class for the vertices of the graph that provide the necessary
     information of a station or a corner.
 
@@ -17,16 +17,15 @@ class Node:
 
     # Private Instance Attributes:
     #    - _is_station: Whether node is station or corner
-    name: str
     colors: set[str]
     _is_station: bool
-    neighbouring_stations: dict[Node, float]
+    neighbouring_stations: dict[_Node, tuple[float, float]]
     coordinates: tuple[float, float]
 
-    def __init__(self, station_name: str, colors: set[str], neighbouring_stations: set[Node],
+    def __init__(self, colors: set[str],
+                 neighbouring_stations: dict[_Node, tuple[float, float]],
                  coordinates: tuple[float, float], _is_station: bool) -> None:
         """Initialize a new Station object."""
-        self.name = station_name
         self.neighbouring_stations = neighbouring_stations
         self.colors = colors
         self.coordinates = coordinates
