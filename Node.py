@@ -2,49 +2,41 @@
 for the OMG graph."""
 from __future__ import annotations
 
-from typing import Union
-
 
 class Node:
     """A class for the vertices of the graph that provide the necessary
-    information of a station.
+    information of a station or a corner.
 
     Instance Attributes:
         - name: The name of the station.
-        - destination_distance: Direct distance of the current station to the final station by the
-                                method of 'as the crow flies'.
-        - final_score: Keeps track of the score of the vertex. Like a rank (lower the better).
-        - colors:
-        - from_node: Keeps track of the previous node to make connections in the algorithm.
+        - colors: Represents the color line of the current node.
         - neighbouring_station: The Station(vertices) that are adjacent to this station.
         - coordinates: Coordinates of the current station on the grid(graph).
 
     """
 
     # Private Instance Attributes:
-    #    - _is_station: Whether
+    #    - _is_station: Whether node is station or corner
     name: str
-    destination_distance: float
-    final_score: float
     colors: set[str]
     _is_station: bool
-    from_node: Union[str, Node]  # Want to keep name or the vertex itself?
-    neighbouring_stations: dict[Node, float]  # same as below, not sure whether Track attribute or here.
+    neighbouring_stations: dict[Node, float]
     coordinates: tuple[float, float]
 
-    def __init__(self, station_name: str, destination_distance: float, final_score: float,
-                 previous_node: Union[str, Node], neighbours: set[Node],
-                 coordinates: tuple[float, float]) -> None:
+    def __init__(self, station_name: str, colors: set[str], neighbouring_stations: set[Node],
+                 coordinates: tuple[float, float], _is_station: bool) -> None:
         """Initialize a new Station object."""
         self.name = station_name
-        self.destination_distance = destination_distance
-        self.final_score = final_score
-        self.from_node = previous_node
-        self.neighbouring_stations = neighbours
+        self.neighbouring_stations = neighbouring_stations
+        self.colors = colors
         self.coordinates = coordinates
+        self._is_station = _is_station
 
     def degree(self) -> int:
         """Calculates the degree of the current station, i.e., how many other vertices are connected
         to this current vertex."""
         return len(self.neighbouring_stations)
 
+    def is_station(self) -> bool:
+        """Returns if current node is a station or not"""
+        return self._is_station
