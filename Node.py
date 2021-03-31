@@ -16,26 +16,22 @@ class _Node:
     """
 
     # Private Instance Attributes:
-    #    - _is_station: Whether node is station or corner
+    #    - is_station: Whether node is station or corner
     colors: set[str]
-    _is_station: bool
+    is_station: bool
     neighbouring_stations: dict[_Node, tuple[float, float]]
     coordinates: tuple[float, float]
 
     def __init__(self, colors: set[str],
                  neighbouring_stations: dict[_Node, tuple[float, float]],
-                 coordinates: tuple[float, float], _is_station: bool) -> None:
+                 coordinates: tuple[float, float], is_station: bool) -> None:
         """Initialize a new Station object."""
         self.neighbouring_stations = neighbouring_stations
         self.colors = colors
         self.coordinates = coordinates
-        self._is_station = _is_station
+        self.is_station = is_station
 
     def degree(self) -> int:
         """Calculates the degree of the current station, i.e., how many other vertices are connected
         to this current vertex."""
         return len(self.neighbouring_stations)
-
-    def is_station(self) -> bool:
-        """Returns if current node is a station or not"""
-        return self._is_station
