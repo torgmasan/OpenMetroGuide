@@ -1,5 +1,5 @@
 from Node import _Node
-
+import math
 
 class Map:
     """Represents the graph of the map where the calculation to find the shortest/cheapest route
@@ -62,3 +62,9 @@ class Map:
 
     def optimized_route(self, start: str, destination: str) -> list[str]:
         """Returns the most optimized route """
+        visited = set()
+        node_queue = []
+        node_queue.append([start, 0])
+        node_queue.extend([[name, math.inf] for name in self._nodes
+                           if name != start])
+
