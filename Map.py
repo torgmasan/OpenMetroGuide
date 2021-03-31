@@ -26,10 +26,10 @@ class Map:
 
     def add_node(self, name: str, colors: set[str],
                  neighbouring_stations: dict[_Node, tuple[float, float]],
-                 coordinates: tuple[float, float], _is_station: bool) -> None:
+                 coordinates: tuple[float, float], is_station: bool) -> None:
         """Adds a node to the map"""
         self._nodes[name] = _Node(colors, neighbouring_stations,
-                                  coordinates, _is_station)
+                                  coordinates, is_station)
 
     def add_track(self, name_1: str, name_2: str, weight: tuple[float, float]) -> None:
         """Adds a weighted track to the map
