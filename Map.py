@@ -1,5 +1,51 @@
+from __future__ import annotations
+
+from typing import Optional
+
 from Node import _Node
 import math
+from dataclasses import dataclass
+
+
+@dataclass
+class QueueElement:
+    """A member of the PriorityQueue created when
+    finding the optimized route.
+    """
+    name: str
+    distance_from_start: float
+    previous_vertex: Optional[QueueElement] = None
+
+
+def get_path(curr_element: QueueElement) -> list[str]:
+    if curr_element.previous_vertex is None:
+        return [curr_element.name]
+    else:
+        return get_path(curr_element.previous_vertex).extend([curr_element.name])
+
+
+def get_element(node_queue: list[QueueElement], name: str) -> QueueElement:
+    for element in node_queue:
+        if element.name == name:
+            return element
+
+
+def update_element(node_queue: list[QueueElement], name: str,
+                   new_distance_from_start: int) -> None:
+    get_element(node_queue, name).distance_from_start = new_distance_from_start
+
+
+def enqueue(node_queue: list[QueueElement], entry: QueueElement) -> None:
+    node_queue.remove(entry)
+
+    for i in range(0, len(node_queue) - 1):
+        if entry.distance_from_start < node_queue[i].distance_from_start:
+            node_queue.insert(i, entry)
+
+
+def dequeue(node_queue: list[QueueElement]) -> QueueElement:
+    return node_queue.pop(0)
+
 
 class Map:
     """Represents the graph of the map where the calculation to find the shortest/cheapest route
@@ -25,25 +71,22 @@ class Map:
             raise ValueError
 
     def add_node(self, name: str, colors: set[str],
-                 neighbouring_stations: dict[_Node, tuple[float, float]],
                  coordinates: tuple[float, float], is_station: bool) -> None:
         """Adds a node to the map"""
-        self._nodes[name] = _Node(colors, neighbouring_stations,
-                                  coordinates, is_station)
+        self._nodes[name] = _Node(name, colors, coordinates, is_station)
 
-    def add_track(self, name_1: str, name_2: str, weight: tuple[float, float]) -> None:
+    def add_track(self, name_1: str, name_2: str) -> None:
         """Adds a weighted track to the map
         If any are absent, raise ValueError
         """
         if name_1 and name_2 in self._nodes:
             node_1 = self._nodes[name_1]
             node_2 = self._nodes[name_2]
-            node_1.neighbouring_stations[node_2] = weight
-            node_2.neighbouring_stations[node_1] = weight
+            node_1.add_track(node_2)
         else:
             raise ValueError
 
-    def get_track_weight(self, name_1: str, name_2: str, choice: str = 'distance') -> float:
+    def get_track_weight(self, name_1: str, name_2: str) -> float:
         """Returns the weight of the track between two nodes.
         Raises ValueError if no such track exists
         """
@@ -51,20 +94,28 @@ class Map:
             node_1 = self._nodes[name_1]
             node_2 = self._nodes[name_2]
 
-            if node_2 in node_1.neighbouring_stations:
-                wt = node_1.neighbouring_stations[node_2]
-                if choice == 'distance':
-                    return wt[0]
-                else:
-                    return wt[1]
+            neighboring_stations = node_1.get_neighbours()
+
+            if node_2 in neighboring_stations:
+                wt = node_1.get_weight(node_2)
+                return wt
 
         raise ValueError
 
     def optimized_route(self, start: str, destination: str) -> list[str]:
         """Returns the most optimized route """
-        visited = set()
-        node_queue = []
-        node_queue.append([start, 0])
-        node_queue.extend([[name, math.inf] for name in self._nodes
+        node_queue = [QueueElement(start, 0)]
+        node_queue.extend([QueueElement(name, math.inf) for name in self._nodes
                            if name != start])
 
+        while (curr_element := dequeue(node_queue)).name != destination:
+            tmp_node = self._nodes[curr_element.name]
+
+            for node in tmp_node.get_neighbours():
+                to_add = tmp_node.get_weight(node)
+
+                new_element = get_element(node_queue, node.name)
+                new_element.distance_from_start = to_add + curr_element.distance_from_start
+                enqueue(node_queue, new_element)
+
+        return get_path(curr_element)

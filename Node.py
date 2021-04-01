@@ -2,6 +2,8 @@
 for the OpenMetroGuide graph."""
 from __future__ import annotations
 
+import math
+
 
 class _Node:
     """A class for the vertices of the graph that provide the necessary
@@ -17,21 +19,35 @@ class _Node:
 
     # Private Instance Attributes:
     #    - is_station: Whether node is station or corner
+    name: str
     colors: set[str]
     is_station: bool
-    neighbouring_stations: dict[_Node, tuple[float, float]]
+    _neighbouring_nodes: dict[_Node, float]
     coordinates: tuple[float, float]
 
-    def __init__(self, colors: set[str],
-                 neighbouring_stations: dict[_Node, tuple[float, float]],
+    def __init__(self, name: str, colors: set[str],
                  coordinates: tuple[float, float], is_station: bool) -> None:
         """Initialize a new Station object."""
-        self.neighbouring_stations = neighbouring_stations
+        self.name = name
+        self._neighbouring_nodes = {}
         self.colors = colors
         self.coordinates = coordinates
         self.is_station = is_station
 
-    def degree(self) -> int:
-        """Calculates the degree of the current station, i.e., how many other vertices are connected
-        to this current vertex."""
-        return len(self.neighbouring_stations)
+    def add_track(self, node_2: _Node):
+        """Adds track between two nodes"""
+        x1, x2 = self.coordinates[0], node_2.coordinates[0]
+        y1, y2 = self.coordinates[1], node_2.coordinates[1]
+        weight = math.sqrt((x2 - x1) ** 2 - (y2 - y1) ** 2)
+        self._neighbouring_nodes[node_2] = weight
+        node_2._neighbouring_nodes[self] = weight
+
+    def get_neighbours(self) -> set[_Node]:
+        """Gets the neighboring nodes of the station,
+        according to the type of node requested by user.
+        """
+        return set(self._neighbouring_nodes.keys())
+
+    def get_weight(self, node2: _Node) -> float:
+        """Returns the weight between two nodes"""
+        return self._neighbouring_nodes[node2]
