@@ -115,7 +115,30 @@ class Map:
                 to_add = tmp_node.get_weight(node)
 
                 new_element = get_element(node_queue, node.name)
+
                 new_element.distance_from_start = to_add + curr_element.distance_from_start
                 enqueue(node_queue, new_element)
 
         return get_path(curr_element)
+
+
+if __name__ == "__main__":
+    m = Map()
+    for ch in 'ABCDE':
+        m.add_node(ch, set(), (0, 0), True)
+
+    m.add_track('A', 'D')
+    m.add_track('A', 'B')
+    m.add_track('D', 'B')
+    m.add_track('D', 'E')
+    m.add_track('E', 'B')
+    m.add_track('E', 'C')
+    m.add_track('B', 'C')
+
+    m.get_node('A'). _neighbouring_nodes[m.get_node('D')] = 1
+    m.get_node('A')._neighbouring_nodes[m.get_node('B')] = 6
+    m.get_node('D')._neighbouring_nodes[m.get_node('B')] = 2
+    m.get_node('D')._neighbouring_nodes[m.get_node('E')] = 1
+    m.get_node('E')._neighbouring_nodes[m.get_node('B')] = 2
+    m.get_node('E')._neighbouring_nodes[m.get_node('C')] = 5
+    m.get_node('B')._neighbouring_nodes[m.get_node('C')] = 5
