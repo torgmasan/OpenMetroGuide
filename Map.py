@@ -28,7 +28,6 @@ def get_element(node_queue: list[QueueElement], name: str) -> QueueElement:
     for element in node_queue:
         if element.name == name:
             return element
-    raise ValueError
 
 
 def update_element(node_queue: list[QueueElement], name: str,
@@ -39,12 +38,7 @@ def update_element(node_queue: list[QueueElement], name: str,
         element.previous_vertex = new_previous
 
 
-def enqueue(node_queue: list[QueueElement], entry: QueueElement) -> None:
-    # node_queue.remove(entry)
-    #
-    # for i in range(0, len(node_queue) - 1):
-    #     if entry.distance_from_start < node_queue[i].distance_from_start:
-    #         node_queue.insert(i, entry)
+def enqueue(node_queue: list[QueueElement]) -> None:
     node_queue.sort(key=lambda x: x.distance_from_start)
 
 
@@ -118,14 +112,12 @@ class Map:
 
             for node in tmp_node.get_neighbours():
                 to_add = tmp_node.get_weight(node)
-
                 print(curr_element.name, [(n.name, n.distance_from_start) for n in node_queue])
-                new_element = get_element(node_queue, node.name)
 
-                # new_element.distance_from_start = to_add + curr_element.distance_from_start
-                update_element(node_queue, node.name,
-                               to_add + curr_element.distance_from_start, curr_element)
-                enqueue(node_queue, new_element)
+                if get_element(node_queue, node.name) is not None:
+                    update_element(node_queue, node.name,
+                                   to_add + curr_element.distance_from_start, curr_element)
+                enqueue(node_queue)
 
         return get_path(curr_element)
 
