@@ -21,7 +21,7 @@ def get_path(curr_element: QueueElement) -> list[str]:
     if curr_element.previous_vertex is None:
         return [curr_element.name]
     else:
-        return get_path(curr_element.previous_vertex).extend([curr_element.name])
+        return get_path(curr_element.previous_vertex) + [curr_element.name]
 
 
 def get_element(node_queue: list[QueueElement], name: str) -> QueueElement:
