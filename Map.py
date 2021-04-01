@@ -28,19 +28,24 @@ def get_element(node_queue: list[QueueElement], name: str) -> QueueElement:
     for element in node_queue:
         if element.name == name:
             return element
+    raise ValueError
 
 
 def update_element(node_queue: list[QueueElement], name: str,
-                   new_distance_from_start: int) -> None:
-    get_element(node_queue, name).distance_from_start = new_distance_from_start
+                   new_distance_from_start: float, new_previous: QueueElement) -> None:
+    element = get_element(node_queue, name)
+    if element.distance_from_start > new_distance_from_start:
+        element.distance_from_start = new_distance_from_start
+        element.previous_vertex = new_previous
 
 
 def enqueue(node_queue: list[QueueElement], entry: QueueElement) -> None:
-    node_queue.remove(entry)
-
-    for i in range(0, len(node_queue) - 1):
-        if entry.distance_from_start < node_queue[i].distance_from_start:
-            node_queue.insert(i, entry)
+    # node_queue.remove(entry)
+    #
+    # for i in range(0, len(node_queue) - 1):
+    #     if entry.distance_from_start < node_queue[i].distance_from_start:
+    #         node_queue.insert(i, entry)
+    node_queue.sort(key=lambda x: x.distance_from_start)
 
 
 def dequeue(node_queue: list[QueueElement]) -> QueueElement:
@@ -114,9 +119,12 @@ class Map:
             for node in tmp_node.get_neighbours():
                 to_add = tmp_node.get_weight(node)
 
+                print(curr_element.name, [(n.name, n.distance_from_start) for n in node_queue])
                 new_element = get_element(node_queue, node.name)
 
-                new_element.distance_from_start = to_add + curr_element.distance_from_start
+                # new_element.distance_from_start = to_add + curr_element.distance_from_start
+                update_element(node_queue, node.name,
+                               to_add + curr_element.distance_from_start, curr_element)
                 enqueue(node_queue, new_element)
 
         return get_path(curr_element)
