@@ -1,3 +1,5 @@
+"""Represent the transit map in the form of a graph.
+"""
 from __future__ import annotations
 
 from typing import Optional
@@ -18,6 +20,9 @@ class QueueElement:
 
 
 def get_path(curr_element: QueueElement) -> list[str]:
+    """Return a list of nodes corresponding to the shortest
+    path from start to destination.
+    """
     if curr_element.previous_vertex is None:
         return [curr_element.name]
     else:
@@ -25,6 +30,8 @@ def get_path(curr_element: QueueElement) -> list[str]:
 
 
 def get_element(node_queue: list[QueueElement], name: str) -> QueueElement:
+    """Return the element with name in the priority queue.
+    """
     for element in node_queue:
         if element.name == name:
             return element
@@ -32,37 +39,47 @@ def get_element(node_queue: list[QueueElement], name: str) -> QueueElement:
 
 def update_element(node_queue: list[QueueElement], name: str,
                    new_distance_from_start: float, new_previous: QueueElement) -> None:
+    """Updates the distance between start and element with name if
+    new_distance_from_start is less than the previous distance from start.
+
+    Also update the previous node.
+    """
     element = get_element(node_queue, name)
     if element.distance_from_start > new_distance_from_start:
         element.distance_from_start = new_distance_from_start
         element.previous_vertex = new_previous
 
 
-def enqueue(node_queue: list[QueueElement]) -> None:
+def sort_queue(node_queue: list[QueueElement]) -> None:
+    """Sort the priority queue in increasing order of QueueElement.distance_from_start.
+    """
     node_queue.sort(key=lambda x: x.distance_from_start)
 
 
 def dequeue(node_queue: list[QueueElement]) -> QueueElement:
+    """Remove and return the first element from the priority queue.
+    """
     return node_queue.pop(0)
 
 
 class Map:
-    """Represents the graph of the map where the calculation to find the shortest/cheapest route
-    will take place.
+    """Represent the graph of the map where the calculation
+    to find the shortest/cheapest route will take place.
     """
     # Instance Attributes:
-    #   - _stations: A collection of stations in this Map. Maps station name to Station instance.
-    #   - _tracks: A collection of tracks in this Map. ...
+    #   - _nodes: A collection of nodes in this Map.
 
     _nodes: dict[str, _Node]
 
     def __init__(self) -> None:
-        """Initializes an empty transit(metro) map without any stations or tracks."""
+        """Initialize an empty transit(metro) map
+        without any stations or tracks.
+        """
         self._nodes = {}
 
     def get_node(self, name: str) -> _Node:
-        """Returns corresponding node of input name
-        If no name found, raise ValueError
+        """Return corresponding node of input name.
+        If no name found, raise ValueError.
         """
         if name in self._nodes:
             return self._nodes[name]
@@ -71,12 +88,14 @@ class Map:
 
     def add_node(self, name: str, colors: set[str],
                  coordinates: tuple[float, float], is_station: bool) -> None:
-        """Adds a node to the map"""
+        """Add a node to the map.
+        """
         self._nodes[name] = _Node(name, colors, coordinates, is_station)
 
     def add_track(self, name_1: str, name_2: str) -> None:
-        """Adds a weighted track to the map
-        If any are absent, raise ValueError
+        """Add a weighted track to the map.
+
+        If any are absent, raise ValueError.
         """
         if name_1 and name_2 in self._nodes:
             node_1 = self._nodes[name_1]
@@ -86,8 +105,9 @@ class Map:
             raise ValueError
 
     def get_track_weight(self, name_1: str, name_2: str) -> float:
-        """Returns the weight of the track between two nodes.
-        Raises ValueError if no such track exists
+        """Return the weight of the track between two nodes.
+
+        Raise ValueError if no such track exists.
         """
         if name_1 and name_2 in self._nodes:
             node_1 = self._nodes[name_1]
@@ -102,7 +122,8 @@ class Map:
         raise ValueError
 
     def optimized_route(self, start: str, destination: str) -> list[str]:
-        """Returns the most optimized route """
+        """Return the most optimized route using the Dijkstra Algorithm.
+        """
         node_queue = [QueueElement(start, 0)]
         node_queue.extend([QueueElement(name, math.inf) for name in self._nodes
                            if name != start])
@@ -116,6 +137,6 @@ class Map:
                 if get_element(node_queue, node.name) is not None:
                     update_element(node_queue, node.name,
                                    to_add + curr_element.distance_from_start, curr_element)
-                enqueue(node_queue)
+                sort_queue(node_queue)
 
         return get_path(curr_element)
