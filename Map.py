@@ -91,6 +91,20 @@ class Map:
         else:
             raise ValueError
 
+    def get_nodes(self, kind: str = '') -> set[_Node]:
+        """Return a set of all nodes in the map.
+
+        Preconditions:
+            - kind in {'', 'station', 'corner'}
+        """
+        all_nodes = set(self._nodes.values())
+        if kind == '':
+            return all_nodes
+        elif kind == 'station':
+            return {node for node in all_nodes if node.is_station}
+        else:
+            return {node for node in all_nodes if not node.is_station}
+
     def add_node(self, name: str, colors: set[str],
                  coordinates: tuple[float, float], is_station: bool) -> None:
         """Add a node to the map.
