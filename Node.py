@@ -51,11 +51,11 @@ class _Node:
         """Returns the weight between two nodes"""
         return self._neighbouring_nodes[node2]
 
-    def get_distance(self, destination_coordinates: _Node) -> float:
+    def get_distance(self, destination_node: _Node) -> float:
         """Returns the direct distance from the
         current node to the destination node.
         """
-        x1, x2 = self.coordinates[0], destination_coordinates.coordinates[0]
-        y1, y2 = self.coordinates[1], destination_coordinates.coordinates[1]
+        x1, x2 = self.coordinates[0], destination_node.coordinates[0]
+        y1, y2 = self.coordinates[1], destination_node.coordinates[1]
         weight = math.sqrt((x2 - x1) ** 2 - (y2 - y1) ** 2)
         return weight

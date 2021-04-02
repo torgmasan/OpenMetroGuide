@@ -48,6 +48,7 @@ def update_element(node_queue: list[QueueElement], name: str, new_distance_from_
     """
     element = get_element(node_queue, name)
     new_total_score = new_distance_from_start + element.distance_to_destination
+
     if element.total_score > new_total_score:
         element.total_score = new_total_score
         element.distance_from_start = new_distance_from_start
