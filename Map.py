@@ -31,7 +31,7 @@ def get_path(curr_element: QueueElement) -> list[str]:
         return get_path(curr_element.previous_vertex) + [curr_element.name]
 
 
-def get_element(node_queue: list[QueueElement], name: str) -> QueueElement:
+def get_element(node_queue: list[QueueElement], name: str) -> Optional[QueueElement]:
     """Return the element with name in the priority queue.
     """
     for element in node_queue:
