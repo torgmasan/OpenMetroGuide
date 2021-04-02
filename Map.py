@@ -40,13 +40,14 @@ def get_element(node_queue: list[QueueElement], name: str) -> QueueElement:
 
 
 def update_element(node_queue: list[QueueElement], name: str, new_distance_from_start: float,
-                   new_total_score: float, new_previous: QueueElement) -> None:
+                   new_previous: QueueElement) -> None:
     """Updates the distance between start and element with name if
     new_distance_from_start is less than the previous distance from start.
 
     Also update the previous node.
     """
     element = get_element(node_queue, name)
+    new_total_score = new_distance_from_start + element.distance_to_destination
     if element.total_score > new_total_score:
         element.total_score = new_total_score
         element.distance_from_start = new_distance_from_start
@@ -143,11 +144,8 @@ class Map:
                 to_add = tmp_node.get_weight(node)
 
                 if get_element(node_queue, node.name) is not None:
-                    new_total_score = to_add + curr_element.distance_from_start + \
-                                      curr_element.distance_to_destination
                     update_element(node_queue, node.name,
-                                   to_add + curr_element.distance_from_start, new_total_score,
-                                   curr_element)
+                                   to_add + curr_element.distance_from_start, curr_element)
                 sort_queue(node_queue)
 
         return get_path(curr_element)
