@@ -12,13 +12,14 @@ class _Node:
     Instance Attributes:
         - name: The name of the station.
         - colors: Represents the color line of the current node.
-        - neighbouring_station: The Station(vertices) that are adjacent to this station.
+        - is_station: Whether the current node is a station or a corner.
         - coordinates: Coordinates of the current station on the grid(graph).
 
     """
 
     # Private Instance Attributes:
-    #    - is_station: Whether node is station or corner
+    #    - _neighbouring_nodes: The nodes which are adjacent to the current node
+    #    and their corresponding weights with the current node.
     name: str
     colors: set[str]
     is_station: bool
@@ -36,9 +37,7 @@ class _Node:
 
     def add_track(self, node_2: _Node):
         """Adds track between two nodes"""
-        x1, x2 = self.coordinates[0], node_2.coordinates[0]
-        y1, y2 = self.coordinates[1], node_2.coordinates[1]
-        weight = math.sqrt((x2 - x1) ** 2 - (y2 - y1) ** 2)
+        weight = self.get_distance(node_2)
         self._neighbouring_nodes[node_2] = weight
         node_2._neighbouring_nodes[self] = weight
 
@@ -51,3 +50,12 @@ class _Node:
     def get_weight(self, node2: _Node) -> float:
         """Returns the weight between two nodes"""
         return self._neighbouring_nodes[node2]
+
+    def get_distance(self, destination_coordinates: _Node) -> float:
+        """Returns the direct distance from the
+        current node to the destination node.
+        """
+        x1, x2 = self.coordinates[0], destination_coordinates.coordinates[0]
+        y1, y2 = self.coordinates[1], destination_coordinates.coordinates[1]
+        weight = math.sqrt((x2 - x1) ** 2 - (y2 - y1) ** 2)
+        return weight

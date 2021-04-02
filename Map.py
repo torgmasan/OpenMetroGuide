@@ -16,6 +16,8 @@ class QueueElement:
     """
     name: str
     distance_from_start: float
+    distance_to_destination: float
+    total_score: float
     previous_vertex: Optional[QueueElement] = None
 
 
@@ -37,23 +39,24 @@ def get_element(node_queue: list[QueueElement], name: str) -> QueueElement:
             return element
 
 
-def update_element(node_queue: list[QueueElement], name: str,
-                   new_distance_from_start: float, new_previous: QueueElement) -> None:
+def update_element(node_queue: list[QueueElement], name: str, new_distance_from_start: float,
+                   new_total_score: float, new_previous: QueueElement) -> None:
     """Updates the distance between start and element with name if
     new_distance_from_start is less than the previous distance from start.
 
     Also update the previous node.
     """
     element = get_element(node_queue, name)
-    if element.distance_from_start > new_distance_from_start:
+    if element.total_score > new_total_score:
+        element.total_score = new_total_score
         element.distance_from_start = new_distance_from_start
         element.previous_vertex = new_previous
 
 
 def sort_queue(node_queue: list[QueueElement]) -> None:
-    """Sort the priority queue in increasing order of QueueElement.distance_from_start.
+    """Sort the priority queue in increasing order of QueueElement.total_score.
     """
-    node_queue.sort(key=lambda x: x.distance_from_start)
+    node_queue.sort(key=lambda x: x.total_score)
 
 
 def dequeue(node_queue: list[QueueElement]) -> QueueElement:
@@ -124,9 +127,14 @@ class Map:
     def optimized_route(self, start: str, destination: str) -> list[str]:
         """Return the most optimized route using the Dijkstra Algorithm.
         """
-        node_queue = [QueueElement(start, 0)]
-        node_queue.extend([QueueElement(name, math.inf) for name in self._nodes
-                           if name != start])
+        start_node = self.get_node(start)
+        end_node = self.get_node(destination)
+        node_queue = [QueueElement(start, 0,
+                                   start_node.get_distance(end_node),
+                                   start_node.get_distance(end_node))]
+        node_queue.extend([QueueElement(name, math.inf,
+                                        self._nodes[name].get_distance(end_node), math.inf)
+                           for name in self._nodes if name != start])
 
         while (curr_element := dequeue(node_queue)).name != destination:
             tmp_node = self._nodes[curr_element.name]
@@ -135,8 +143,11 @@ class Map:
                 to_add = tmp_node.get_weight(node)
 
                 if get_element(node_queue, node.name) is not None:
+                    new_total_score = to_add + curr_element.distance_from_start + \
+                                      curr_element.distance_to_destination
                     update_element(node_queue, node.name,
-                                   to_add + curr_element.distance_from_start, curr_element)
+                                   to_add + curr_element.distance_from_start, new_total_score,
+                                   curr_element)
                 sort_queue(node_queue)
 
         return get_path(curr_element)
