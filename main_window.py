@@ -44,7 +44,7 @@ def make_text(screen: pygame.Surface, text: str, size: int,
     """Renders the required text on the application, at the
     required location, with the specified font size.
     """
-    font = pygame.font.SysFont(name=None, size=size)
+    font = pygame.font.SysFont(name='inconsolata', size=size)
     render = font.render(text, True, BLACK)
     screen.blit(render, location)
 
