@@ -1,5 +1,5 @@
 import pygame
-import Admin
+import User
 import sys
 
 BLACK = (0, 0, 0)
@@ -29,8 +29,8 @@ def run_home() -> None:
                 elif event.key == pygame.K_UP:
                     current = 'admin'
                 elif event.key == pygame.K_RETURN:
-                    new_screen = Admin.initialize_screen(Admin.SCREEN_SIZE, [pygame.MOUSEBUTTONDOWN])
-                    Admin.draw_grid(new_screen)
+                    new_screen = User.initialize_screen(User.SCREEN_SIZE, [pygame.MOUSEBUTTONDOWN])
+                    User.draw_grid(new_screen)
                     chk = False
                     break
 
