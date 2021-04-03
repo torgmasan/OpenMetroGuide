@@ -91,7 +91,7 @@ class Map:
         else:
             raise ValueError
 
-    def get_nodes(self, kind: str = '') -> set[_Node]:
+    def get_all_nodes(self, kind: str = '') -> set[_Node]:
         """Return a set of all nodes in the map.
 
         Preconditions:

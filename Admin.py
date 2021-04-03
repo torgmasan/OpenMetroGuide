@@ -68,7 +68,7 @@ class User:
         Preconditions:
             - kind in {'', 'station', 'corner'}
         """
-        for node in self.metro_map.get_nodes(kind):
+        for node in self.metro_map.get_all_nodes(kind):
             if node.coordinates == coordinates:
                 return True
         return False
