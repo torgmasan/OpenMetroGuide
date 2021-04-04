@@ -6,7 +6,7 @@ import pygame
 from Map import Map
 from Node import _Node
 
-SCREEN_SIZE = (800, 800)  # (width, height)
+SCREEN_SIZE = (600, 600)  # (width, height)
 GRID_SIZE = 20
 
 
@@ -49,13 +49,20 @@ def draw_grid(screen: pygame.Surface) -> None:
     color = THECOLORS['grey']
     width, height = screen.get_size()
 
-    for col in range(1, GRID_SIZE):
-        x = col * (width // GRID_SIZE)
-        pygame.draw.line(screen, color, (x, 0), (x, height))
+    pygame.draw.line(screen, color, (0, 0), (width, height))
+    pygame.draw.line(screen, color, (0, height), (width, 0))
 
-    for row in range(1, GRID_SIZE):
-        y = row * (height // GRID_SIZE)
+    for dim in range(1, GRID_SIZE):
+        x = dim * (width // GRID_SIZE)  # for column (vertical lines)
+        y = dim * (height // GRID_SIZE)  # for row (horizontal lines)
+
+        pygame.draw.line(screen, color, (x, 0), (x, height))
         pygame.draw.line(screen, color, (0, y), (width, y))
+
+        pygame.draw.line(screen, color, (x, 0), (0, y))
+        pygame.draw.line(screen, color, (width - x, height), (width, height - y))
+        pygame.draw.line(screen, color, (x, 0), (width, height - y))
+        pygame.draw.line(screen, color, (0, y), (width - x, height))
 
 
 class User:
@@ -105,7 +112,8 @@ class Admin(User):
             - screen_size[0] >= 200
             - screen_size[1] >= 200
         """
-        coordinates = (round(event.pos[0]), round(event.pos[1]))
+        coordinates = (round(event.pos[0] / GRID_SIZE) * GRID_SIZE,
+                       round(event.pos[1] / GRID_SIZE) * GRID_SIZE)
 
         name = ...
         colors = ...
