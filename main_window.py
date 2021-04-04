@@ -39,24 +39,14 @@ def run_home() -> None:
         pygame.display.flip()
 
 
-def make_text(screen: pygame.Surface, text: str, size: int,
-              location: tuple[int, int]) -> None:
-    """Renders the required text on the application, at the
-    required location, with the specified font size.
-    """
-    font = pygame.font.SysFont(name='inconsolata', size=size)
-    render = font.render(text, True, BLACK)
-    screen.blit(render, location)
-
-
 def refresh_display(screen: pygame.Surface) -> None:
     """Part of the GUI that remains constant throughout
     all interactions with the window. Therefore, during
     each refreshment of the screen, this code snippet is
     reused."""
-    make_text(screen, 'Select an option (Use Up/Down keys):', 30, (20, 50))
-    make_text(screen, 'Run as Admin', 25, (150, 120))
-    make_text(screen, 'Run as Client', 25, (150, 220))
+    User.draw_text(screen, 'Select an option (Use Up/Down keys):', 30, (20, 50))
+    User.draw_text(screen, 'Run as Admin', 25, (150, 120))
+    User.draw_text(screen, 'Run as Client', 25, (150, 220))
     pygame.draw.rect(screen, BLACK,
                      (5, 100, screen.get_width() - 10, 55), 10)
     pygame.draw.rect(screen, BLACK,
