@@ -6,7 +6,7 @@ import pygame
 from Map import Map
 from Node import _Node
 
-SCREEN_SIZE = (600, 600)  # (width, height)
+SCREEN_SIZE = (800, 800)  # (width, height)
 GRID_SIZE = 20
 
 
@@ -65,6 +65,12 @@ def draw_grid(screen: pygame.Surface) -> None:
         pygame.draw.line(screen, color, (0, y), (width - x, height))
 
 
+def get_click_pos(event: pygame.event.Event) -> tuple[int, int]:
+    """Returns the coordinates of the mouse click"""
+    return (round(event.pos[0] / GRID_SIZE) * GRID_SIZE,
+                   round(event.pos[1] / GRID_SIZE) * GRID_SIZE)
+
+
 class User:
     """ummm i"m just here for the lols"""
     metro_map: Map
@@ -112,8 +118,7 @@ class Admin(User):
             - screen_size[0] >= 200
             - screen_size[1] >= 200
         """
-        coordinates = (round(event.pos[0] / GRID_SIZE) * GRID_SIZE,
-                       round(event.pos[1] / GRID_SIZE) * GRID_SIZE)
+        coordinates = get_click_pos(event)
 
         name = ...
         colors = ...
