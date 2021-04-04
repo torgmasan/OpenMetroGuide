@@ -28,12 +28,12 @@ def initialize_screen(screen_size: tuple[int, int], allowed: list) -> pygame.Sur
     return screen
 
 
-def draw_text(screen: pygame.Surface, text: str, pos: tuple[int, int]) -> None:
+def draw_text(screen: pygame.Surface, text: str, font: int, pos: tuple[int, int]) -> None:
     """Draw the given text to the pygame screen at the given position.
 
     pos represents the *upper-left corner* of the text.
     """
-    font = pygame.font.SysFont('inconsolata', 22)
+    font = pygame.font.SysFont('inconsolata', font)
     text_surface = font.render(text, True, THECOLORS['black'])
     width, height = text_surface.get_size()
     screen.blit(text_surface,
