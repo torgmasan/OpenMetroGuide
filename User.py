@@ -2,6 +2,7 @@
 
 from pygame.colordict import THECOLORS
 import pygame
+import sys
 
 from Map import Map
 from Node import _Node
@@ -44,45 +45,6 @@ def draw_text(screen: pygame.Surface, text: str, font: int, pos: tuple[int, int]
                 pygame.Rect(pos, (pos[0] + width, pos[1] + height)))
 
 
-def create_palette(screen: pygame.Surface):
-    """Draw the palette of colors available to the user to choose
-    from. This color will be used to draw on the screen"""
-
-    colors = LINE_COLORS
-    radius = (PALETTE_WIDTH // 2)
-    ht = radius
-
-    for color in colors:
-        pygame.draw.circle(screen, THECOLORS[color], (WIDTH + radius, ht),
-                           radius - 5)
-        ht += 4 * radius
-
-
-def draw_grid(screen: pygame.Surface) -> None:
-    """Draws a square grid on the given surface.
-
-    The drawn grid has GRID_SIZE columns and rows.
-    You can use this to help you check whether you are drawing nodes and edges in the right spots.
-    """
-    color = THECOLORS['grey']
-    width, height = WIDTH, HEIGHT
-
-    pygame.draw.line(screen, color, (0, 0), (width, height))
-    pygame.draw.line(screen, color, (0, height), (width, 0))
-
-    for dim in range(1, GRID_SIZE):
-        x = dim * (width // GRID_SIZE)  # for column (vertical lines)
-        y = dim * (height // GRID_SIZE)  # for row (horizontal lines)
-
-        pygame.draw.line(screen, color, (x, 0), (x, height))
-        pygame.draw.line(screen, color, (0, y), (width, y))
-
-        pygame.draw.line(screen, color, (x, 0), (0, y))
-        pygame.draw.line(screen, color, (width - x, height), (width, height - y))
-        pygame.draw.line(screen, color, (x, 0), (width, height - y))
-        pygame.draw.line(screen, color, (0, y), (width - x, height))
-
-
 def get_click_pos(event: pygame.event.Event) -> tuple[int, int]:
     """Returns the coordinates of the mouse click"""
     return (round(event.pos[0] / GRID_SIZE) * GRID_SIZE,
@@ -92,9 +54,22 @@ def get_click_pos(event: pygame.event.Event) -> tuple[int, int]:
 class User:
     """ummm i"m just here for the lols"""
     metro_map: Map
+    _screen: pygame.Surface
 
     def __init__(self):
         self.metro_map = Map()
+        self._screen = initialize_screen((WIDTH + PALETTE_WIDTH, HEIGHT)
+                                         , [pygame.MOUSEBUTTONDOWN])
+
+        while True:
+            self.draw_grid()
+            self.create_palette()
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
+
+            pygame.display.update()
 
     def node_exists(self, coordinates: tuple[float, float], kind: str = '') -> bool:
         """Return whether a node already exists at the given coordinates.
@@ -107,6 +82,30 @@ class User:
                 return True
         return False
 
+    def draw_grid(self) -> None:
+        """Draws a square grid on the given surface.
+
+        The drawn grid has GRID_SIZE columns and rows.
+        You can use this to help you check whether you are drawing nodes and edges in the right spots.
+        """
+        color = THECOLORS['grey']
+        width, height = WIDTH, HEIGHT
+
+        pygame.draw.line(self._screen, color, (0, 0), (width, height))
+        pygame.draw.line(self._screen, color, (0, height), (width, 0))
+
+        for dim in range(1, GRID_SIZE):
+            x = dim * (width // GRID_SIZE)  # for column (vertical lines)
+            y = dim * (height // GRID_SIZE)  # for row (horizontal lines)
+
+            pygame.draw.line(self._screen, color, (x, 0), (x, height))
+            pygame.draw.line(self._screen, color, (0, y), (width, y))
+
+            pygame.draw.line(self._screen, color, (x, 0), (0, y))
+            pygame.draw.line(self._screen, color, (width - x, height), (width, height - y))
+            pygame.draw.line(self._screen, color, (x, 0), (width, height - y))
+            pygame.draw.line(self._screen, color, (0, y), (width - x, height))
+
     def handle_mouse_click(self, event: pygame.event.Event,
                            screen_size: tuple[int, int],
                            first: bool) -> None:
@@ -114,6 +113,11 @@ class User:
 
         This is an abstract method.
         """
+        raise NotImplementedError
+
+    def create_palette(self) -> None:
+        """Draw the palette of options available to the user to choose
+        from. These options will be used to draw on the screen"""
         raise NotImplementedError
 
 
@@ -124,7 +128,7 @@ class Admin(User):
 
     def __init__(self):
         super(Admin, self).__init__()
-        self._curr_color = ''
+        self._curr_color = 'blue'
 
     def set_color(self, new_color: str):
         """Set color of track/node created.
@@ -174,3 +178,34 @@ class Admin(User):
 
         else:
             return
+
+    def create_palette(self) -> None:
+        """Draw the palette of colors available to the user to choose
+            from. This color will be used to draw on the screen"""
+
+        colors = LINE_COLORS
+        radius = (PALETTE_WIDTH // 2)
+        ht = radius
+
+        for color in colors:
+            pygame.draw.circle(self._screen, THECOLORS[color], (WIDTH + radius, ht),
+                               radius - 5)
+            ht += 4 * radius
+
+
+class Client(User):
+    """Hello, I am the follower"""
+
+    _curr_optimization: str
+
+    def __init__(self):
+        super(Client, self).__init__()
+        self._curr_optimization = 'distance'
+
+    def handle_mouse_click(self, event: pygame.event.Event,
+                           screen_size: tuple[int, int],
+                           first: bool) -> None:
+        pass
+
+    def create_palette(self) -> None:
+        pass
