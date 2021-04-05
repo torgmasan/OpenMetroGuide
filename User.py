@@ -6,8 +6,12 @@ import pygame
 from Map import Map
 from Node import _Node
 
-SCREEN_SIZE = (800, 800)  # (width, height)
+WIDTH = 800
+HEIGHT = 800
+PALETTE_WIDTH = 50
 GRID_SIZE = 20
+LINE_COLORS = ['blue', 'red', 'yellow', 'green', 'brown', 'purple', 'orange',
+               'pink']
 
 
 def initialize_screen(screen_size: tuple[int, int], allowed: list) -> pygame.Surface:
@@ -40,6 +44,20 @@ def draw_text(screen: pygame.Surface, text: str, font: int, pos: tuple[int, int]
                 pygame.Rect(pos, (pos[0] + width, pos[1] + height)))
 
 
+def create_palette(screen: pygame.Surface):
+    """Draw the palette of colors available to the user to choose
+    from. This color will be used to draw on the screen"""
+
+    colors = LINE_COLORS
+    radius = (PALETTE_WIDTH // 2)
+    ht = radius
+
+    for color in colors:
+        pygame.draw.circle(screen, THECOLORS[color], (WIDTH + radius, ht),
+                           radius - 5)
+        ht += 4 * radius
+
+
 def draw_grid(screen: pygame.Surface) -> None:
     """Draws a square grid on the given surface.
 
@@ -47,7 +65,7 @@ def draw_grid(screen: pygame.Surface) -> None:
     You can use this to help you check whether you are drawing nodes and edges in the right spots.
     """
     color = THECOLORS['grey']
-    width, height = screen.get_size()
+    width, height = WIDTH, HEIGHT
 
     pygame.draw.line(screen, color, (0, 0), (width, height))
     pygame.draw.line(screen, color, (0, height), (width, 0))
@@ -68,12 +86,15 @@ def draw_grid(screen: pygame.Surface) -> None:
 def get_click_pos(event: pygame.event.Event) -> tuple[int, int]:
     """Returns the coordinates of the mouse click"""
     return (round(event.pos[0] / GRID_SIZE) * GRID_SIZE,
-                   round(event.pos[1] / GRID_SIZE) * GRID_SIZE)
+            round(event.pos[1] / GRID_SIZE) * GRID_SIZE)
 
 
 class User:
     """ummm i"m just here for the lols"""
     metro_map: Map
+
+    def __init__(self):
+        self.metro_map = Map()
 
     def node_exists(self, coordinates: tuple[float, float], kind: str = '') -> bool:
         """Return whether a node already exists at the given coordinates.
@@ -98,6 +119,20 @@ class User:
 
 class Admin(User):
     """Hello, I am the Creator"""
+
+    _curr_color: str
+
+    def __init__(self):
+        super(Admin, self).__init__()
+        self._curr_color = ''
+
+    def set_color(self, new_color: str):
+        """Set color of track/node created.
+
+        Preconditions:
+            - new_color in LINE_COLORS
+        """
+        self._curr_color = new_color
 
     def handle_mouse_click(self, event: pygame.event.Event,
                            screen_size: tuple[int, int],

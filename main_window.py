@@ -29,8 +29,10 @@ def run_home() -> None:
                 elif event.key == pygame.K_UP:
                     current = 'admin'
                 elif event.key == pygame.K_RETURN:
-                    new_screen = User.initialize_screen(User.SCREEN_SIZE, [pygame.MOUSEBUTTONDOWN])
+                    new_screen = User.initialize_screen((User.WIDTH + User.PALETTE_WIDTH, User.HEIGHT)
+                                                        , [pygame.MOUSEBUTTONDOWN])
                     User.draw_grid(new_screen)
+                    User.create_palette(screen)
                     chk = False
                     break
 
