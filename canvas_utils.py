@@ -5,6 +5,7 @@ constants regarding pygame rendering."""
 
 import pygame
 
+
 INSTRUCT_ADMIN = ["Left click on a point in the grid to add a Metro Station or a",
                   "Node to the Map. Additional Left click deletes Node/Station.",
                   "Right Click on a side or diagonal to add a track line that",
@@ -17,6 +18,7 @@ INSTRUCT_CLIENT = ""
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
+GRID_SIZE = 20
 
 
 def draw_text(screen: pygame.Surface, text: str, font: int, pos: tuple[int, int]) -> None:
@@ -29,3 +31,27 @@ def draw_text(screen: pygame.Surface, text: str, font: int, pos: tuple[int, int]
     width, height = text_surface.get_size()
     screen.blit(text_surface,
                 pygame.Rect(pos, (pos[0] + width, pos[1] + height)))
+
+
+def get_click_pos(event: pygame.event.Event) -> tuple[int, int]:
+    """Returns the coordinates of the mouse click"""
+    return (round(event.pos[0] / GRID_SIZE) * GRID_SIZE,
+            round(event.pos[1] / GRID_SIZE) * GRID_SIZE)
+
+
+def initialize_screen(screen_size: tuple[int, int], allowed: list) -> pygame.Surface:
+    """Initialize pygame and the display window.
+
+    allowed is a list of pygame event types that should be listened for while pygame is running.
+    """
+    pygame.display.init()
+    pygame.font.init()
+    screen = pygame.display.set_mode(screen_size)
+    screen.fill(WHITE)
+    pygame.display.flip()
+
+    pygame.event.clear()
+    pygame.event.set_blocked(None)
+    pygame.event.set_allowed([pygame.QUIT] + allowed)
+
+    return screen

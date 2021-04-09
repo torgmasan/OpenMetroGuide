@@ -2,6 +2,7 @@
 
 from pygame.colordict import THECOLORS
 import pygame
+from canvas_utils import GRID_SIZE, get_click_pos, initialize_screen
 import sys
 
 from Map import Map
@@ -10,33 +11,8 @@ from Node import _Node
 WIDTH = 800
 HEIGHT = 800
 PALETTE_WIDTH = 50
-GRID_SIZE = 20
 LINE_COLORS = ['blue', 'red', 'yellow', 'green', 'brown', 'purple', 'orange',
                'pink']
-
-
-def initialize_screen(screen_size: tuple[int, int], allowed: list) -> pygame.Surface:
-    """Initialize pygame and the display window.
-
-    allowed is a list of pygame event types that should be listened for while pygame is running.
-    """
-    pygame.display.init()
-    pygame.font.init()
-    screen = pygame.display.set_mode(screen_size)
-    screen.fill(THECOLORS['white'])
-    pygame.display.flip()
-
-    pygame.event.clear()
-    pygame.event.set_blocked(None)
-    pygame.event.set_allowed([pygame.QUIT] + allowed)
-
-    return screen
-
-
-def get_click_pos(event: pygame.event.Event) -> tuple[int, int]:
-    """Returns the coordinates of the mouse click"""
-    return (round(event.pos[0] / GRID_SIZE) * GRID_SIZE,
-            round(event.pos[1] / GRID_SIZE) * GRID_SIZE)
 
 
 class User:
