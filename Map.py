@@ -123,6 +123,17 @@ class Map:
         else:
             raise ValueError
 
+    def node_exists(self, coordinates: tuple[float, float], kind: str = '') -> bool:
+        """Return whether a node already exists at the given coordinates.
+
+        Preconditions:
+            - kind in {'', 'station', 'corner'}
+        """
+        for node in self._nodes:
+            if self._nodes[node].coordinates == coordinates:
+                return True
+        return False
+
     def get_track_weight(self, name_1: str, name_2: str) -> float:
         """Return the weight of the track between two nodes.
 

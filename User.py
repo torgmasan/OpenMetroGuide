@@ -2,7 +2,8 @@
 
 from pygame.colordict import THECOLORS
 import pygame
-from canvas_utils import GRID_SIZE, get_click_pos, initialize_screen
+from canvas_utils import GRID_SIZE, get_click_pos, initialize_screen, \
+    BLACK, in_circle
 import sys
 
 from Map import Map
@@ -19,32 +20,28 @@ class User:
     """ummm i"m just here for the lols"""
     metro_map: Map
     _screen: pygame.Surface
+    _curr_opt: str
+    opt_to_center: dict[str: tuple[int, int]]
 
-    def __init__(self):
+    def __init__(self, init_selected: str):
         self.metro_map = Map()
         self._screen = initialize_screen((WIDTH + PALETTE_WIDTH, HEIGHT)
                                          , [pygame.MOUSEBUTTONDOWN])
+        self.opt_to_center = {}
+        self._curr_opt = init_selected
 
         while True:
             self.draw_grid()
             self.create_palette()
+            self.set_selection(self._curr_opt)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    self.handle_mouse_click(event, (WIDTH, HEIGHT), False)
 
             pygame.display.update()
-
-    def node_exists(self, coordinates: tuple[float, float], kind: str = '') -> bool:
-        """Return whether a node already exists at the given coordinates.
-
-        Preconditions:
-            - kind in {'', 'station', 'corner'}
-        """
-        for node in self.metro_map.get_all_nodes(kind):
-            if node.coordinates == coordinates:
-                return True
-        return False
 
     def draw_grid(self) -> None:
         """Draws a square grid on the given surface.
@@ -84,15 +81,19 @@ class User:
         from. These options will be used to draw on the screen"""
         raise NotImplementedError
 
+    def set_selection(self, palette_choice: str) -> None:
+        """Darkens the borders of the selected option from the palette provided.
+        Also changes the parameter that represents the selected option to the
+        selected one.
+        """
+        raise NotImplementedError
+
 
 class Admin(User):
     """Hello, I am the Creator"""
 
-    _curr_color: str
-
     def __init__(self):
-        super(Admin, self).__init__()
-        self._curr_color = 'blue'
+        super(Admin, self).__init__('blue')
 
     def set_color(self, new_color: str):
         """Set color of track/node created.
@@ -100,7 +101,7 @@ class Admin(User):
         Preconditions:
             - new_color in LINE_COLORS
         """
-        self._curr_color = new_color
+        self._curr_opt = new_color
 
     def handle_mouse_click(self, event: pygame.event.Event,
                            screen_size: tuple[int, int],
@@ -122,39 +123,58 @@ class Admin(User):
             - screen_size[1] >= 200
         """
         coordinates = get_click_pos(event)
+        radius = (PALETTE_WIDTH // 2)
 
-        name = ...
-        colors = ...
-        is_station = ...
+        for option in self.opt_to_center:
+            if in_circle(radius, self.opt_to_center[option], coordinates):
+                self.set_color(option)
+                return
 
-        if coordinates[0] % GRID_SIZE != 0 or coordinates[1] % GRID_SIZE != 0:
-            return
-
-        elif event.button == 3 and first and self.node_exists(coordinates, kind='station'):
-            event_2 = pygame.event.wait()
-            self.handle_mouse_click(event_2, screen_size, not first)
-
-        elif event.button == 3 and not first and self.node_exists(coordinates, kind='station'):
-            self.metro_map.add_track()
-
-        elif event.button == 1 and not self.node_exists(coordinates, kind='station'):
-            self.metro_map.add_node(name, colors, coordinates, is_station)
-
-        else:
-            return
+        # name = ...
+        # colors = ...
+        # is_station = ...
+        #
+        # if coordinates[0] % GRID_SIZE != 0 or coordinates[1] % GRID_SIZE != 0:
+        #     return
+        #
+        # elif event.button == 3 and first and self.metro_map.node_exists(coordinates, kind='station'):
+        #     event_2 = pygame.event.wait()
+        #     self.handle_mouse_click(event_2, screen_size, not first)
+        #
+        # elif event.button == 3 and not first and self.metro_map.node_exists(coordinates, kind='station'):
+        #     self.metro_map.add_track()
+        #
+        # elif event.button == 1 and not self.metro_map.node_exists(coordinates, kind='station'):
+        #     self.metro_map.add_node(name, colors, coordinates, is_station)
+        #
+        # else:
+        #     return
 
     def create_palette(self) -> None:
         """Draw the palette of colors available to the user to choose
             from. This color will be used to draw on the screen"""
 
-        colors = LINE_COLORS
         radius = (PALETTE_WIDTH // 2)
         ht = radius
 
-        for color in colors:
+        for color in LINE_COLORS:
             pygame.draw.circle(self._screen, THECOLORS[color], (WIDTH + radius, ht),
                                radius - 5)
+            self.opt_to_center[color] = (WIDTH + radius, ht)
             ht += 4 * radius
+
+    def set_selection(self, palette_choice: str) -> None:
+        """Darkens the borders of the selected color from the palette provided.
+
+        Preconditions:
+            - palette_choice in self.opt_to_center
+        """
+        radius = (PALETTE_WIDTH // 2)
+
+        target = self.opt_to_center[palette_choice]
+
+        pygame.draw.circle(self._screen, BLACK, target,
+                           radius - 5, 5)
 
 
 class Client(User):
@@ -172,4 +192,11 @@ class Client(User):
         pass
 
     def create_palette(self) -> None:
+        pass
+
+    def set_selection(self, palette_choice: str) -> None:
+        """Darkens the borders of the selected optimization from the palette provided.
+        Also changes self._curr_optimization that represents the selected option to the
+        selected one.
+        """
         pass
