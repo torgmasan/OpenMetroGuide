@@ -134,7 +134,7 @@ class Map:
                 return True
         return False
 
-    def get_track_weight(self, name_1: str, name_2: str) -> float:
+    def get_track_length(self, name_1: str, name_2: str) -> float:
         """Return the weight of the track between two nodes.
 
         Raise ValueError if no such track exists.
@@ -167,7 +167,7 @@ class Map:
             tmp_node = self._nodes[curr_element.name]
 
             for node in tmp_node.get_neighbours():
-                to_add = tmp_node.get_weight(node)
+                to_add = self.get_track_length(tmp_node.name, node.name)
 
                 if get_element(node_queue, node.name) is not None:
                     update_element(node_queue, node.name,
