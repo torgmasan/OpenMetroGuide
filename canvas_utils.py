@@ -8,7 +8,12 @@ import math
 
 WIDTH = 800
 HEIGHT = 800
+GRID_SIZE = 20
+
 PALETTE_WIDTH = 50
+
+BOX_WIDTH = WIDTH // GRID_SIZE
+BOX_HEIGHT = HEIGHT // GRID_SIZE
 
 
 INSTRUCT_ADMIN = ["Left click on a point in the grid to add a Metro Station or a",
@@ -23,7 +28,6 @@ INSTRUCT_CLIENT = ""
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
-GRID_SIZE = 20
 
 
 def draw_text(screen: pygame.Surface, text: str, font: int, pos: tuple[int, int]) -> None:
@@ -40,8 +44,8 @@ def draw_text(screen: pygame.Surface, text: str, font: int, pos: tuple[int, int]
 
 def get_click_pos(event: pygame.event.Event) -> tuple[int, int]:
     """Return the approximated coordinates of the mouse click for the station"""
-    return (round(event.pos[0] / (WIDTH // GRID_SIZE)) * (WIDTH // GRID_SIZE),
-            round(event.pos[1] / (HEIGHT // GRID_SIZE)) * (HEIGHT // GRID_SIZE))
+    return (round(event.pos[0] / BOX_WIDTH) * BOX_WIDTH,
+            round(event.pos[1] / BOX_HEIGHT) * BOX_HEIGHT)
 
 
 def approximate_edge_click(event: pygame.event.Event) -> tuple[tuple[int, int], tuple[int, int]]:
@@ -81,11 +85,11 @@ def _get_all_edges(event: pygame.event.Event) -> list[tuple[tuple[int, int], tup
 
     Return all edges in the box of the click (including the boundary edges).
     """
-    top_left = ((event.pos[0] // (WIDTH // GRID_SIZE)) * (WIDTH // GRID_SIZE),
-                (event.pos[1] // (HEIGHT // GRID_SIZE)) * (HEIGHT // GRID_SIZE))
-    top_right = (top_left[0] + WIDTH // GRID_SIZE, top_left[1])
-    bottom_left = (top_left[0], top_left[1] + HEIGHT // GRID_SIZE)
-    bottom_right = (top_left[0] + WIDTH // GRID_SIZE, top_left[1] + HEIGHT // GRID_SIZE)
+    top_left = ((event.pos[0] // BOX_WIDTH) * BOX_WIDTH,
+                (event.pos[1] // BOX_HEIGHT) * BOX_HEIGHT)
+    top_right = (top_left[0] + BOX_WIDTH, top_left[1])
+    bottom_left = (top_left[0], top_left[1] + BOX_HEIGHT)
+    bottom_right = (top_left[0] + BOX_WIDTH, top_left[1] + BOX_HEIGHT)
 
     return [(top_left, top_right), (top_left, bottom_left), (bottom_left, bottom_right),
             (top_right, bottom_right), (top_left, bottom_right), (top_right, bottom_left)]
