@@ -138,6 +138,9 @@ class Map:
         """Return the weight of the track between two nodes.
 
         Raise ValueError if no such track exists.
+
+        Preconditions:
+            optimization in {'distance', 'cost'}
         """
         if name_1 and name_2 in self._nodes:
             node_1 = self._nodes[name_1]
