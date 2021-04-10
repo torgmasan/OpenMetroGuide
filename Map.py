@@ -151,6 +151,9 @@ class Map:
 
         raise ValueError
 
+    def get_track_cost(self, name_1: str, name_2: str) -> float:
+        pass
+
     def optimized_route(self, start: str, destination: str) -> list[str]:
         """Return the most optimized route using the Dijkstra Algorithm.
         """
