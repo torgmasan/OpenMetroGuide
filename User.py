@@ -1,8 +1,9 @@
-"""i have no thoughts"""
+"""i have no thoughts
+"""
 
 from pygame.colordict import THECOLORS
 import pygame
-from canvas_utils import GRID_SIZE, get_click_pos, initialize_screen, \
+from canvas_utils import GRID_SIZE, get_click_pos, initialize_screen, approximate_edge_click, \
     BLACK, in_circle, WIDTH, HEIGHT, PALETTE_WIDTH
 import sys
 
@@ -22,8 +23,8 @@ class User:
 
     def __init__(self, init_selected: str):
         self.metro_map = Map()
-        self._screen = initialize_screen((WIDTH + PALETTE_WIDTH, HEIGHT)
-                                         , [pygame.MOUSEBUTTONDOWN])
+        self._screen = initialize_screen((WIDTH + PALETTE_WIDTH, HEIGHT),
+                                         [pygame.MOUSEBUTTONDOWN])
         self.opt_to_center = {}
         self._curr_opt = init_selected
 
@@ -36,7 +37,13 @@ class User:
                 if event.type == pygame.QUIT:
                     sys.exit()
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    self.handle_mouse_click(event, (WIDTH, HEIGHT), False)
+                    keys = pygame.key.get_pressed()
+                    letter = ''
+                    if keys[pygame.K_s]:
+                        letter = 'S'
+                    elif keys[pygame.K_c]:
+                        letter = 'C'
+                    self.handle_mouse_click(event, (WIDTH, HEIGHT), False, letter)
 
             pygame.display.update()
 
@@ -66,7 +73,7 @@ class User:
 
     def handle_mouse_click(self, event: pygame.event.Event,
                            screen_size: tuple[int, int],
-                           first: bool) -> None:
+                           first: bool, letter: str) -> None:
         """Handle a mouse click event.
 
         This is an abstract method.
@@ -102,7 +109,7 @@ class Admin(User):
 
     def handle_mouse_click(self, event: pygame.event.Event,
                            screen_size: tuple[int, int],
-                           first: bool) -> None:
+                           first: bool, letter: str) -> None:
         """Handle a mouse click event.
 
         A pygame mouse click event object has two attributes that are important for this method:
@@ -113,37 +120,58 @@ class Admin(User):
         The screen_size is a tuple of (width, height), and should be used together with
         event.pos to determine which cell is being clicked.
 
-        If the click is within the area
+        If the click is within the area of the palette, then check if it is within any color and
+        handle accordingly.
+
+        If the click is within the grid, check if the click is left or right. A right click is handled
+        by creating a track. If left click and the letter 'S' or 'C' is being pressed, a station or a corner
+        is created respectively. Delete an existing track by right clicking on it, and delete a corner/station by
+        left clicking on it.
 
         Preconditions:
             - event.type == pygame.MOUSEBUTTONDOWN
-            - screen_size[0] >= 200
-            - screen_size[1] >= 200
+            - screen_size[0] >= ...
+            - screen_size[1] >= ...
         """
         coordinates = get_click_pos(event)
 
-        name = ...
-        colors = ...
-        is_station = ...
-
-        if event.button == 3 and first and self.metro_map.node_exists(coordinates, kind='station'):
-            event_2 = pygame.event.wait()
-            self.handle_mouse_click(event_2, screen_size, not first)
-
-        elif event.button == 3 and not first and self.metro_map.node_exists(coordinates, kind='station'):
-            self.metro_map.add_track()
-
-        elif event.button == 1 and not self.metro_map.node_exists(coordinates, kind='station'):
+        if coordinates[0] > WIDTH:
             radius = (PALETTE_WIDTH // 2)
 
             for option in self.opt_to_center:
                 if in_circle(radius, self.opt_to_center[option], coordinates):
                     self.set_color(option)
                     return
-            # self.metro_map.add_node(name, colors, coordinates, is_station)
-
         else:
-            return
+            if event.button == 3:
+                line_coordinates = approximate_edge_click(event)
+                pygame.draw.line(self._screen, self._curr_opt, line_coordinates[0], line_coordinates[2], 3)
+            elif event.button == 1:
+                pass
+            else:
+                return
+        # name = ...
+        # colors = ...
+        # is_station = ...
+        #
+        # if event.button == 3 and first and self.metro_map.node_exists(coordinates, kind='station'):
+        #     event_2 = pygame.event.wait()
+        #     self.handle_mouse_click(event_2, screen_size, not first)
+        #
+        # elif event.button == 3 and not first and self.metro_map.node_exists(coordinates, kind='station'):
+        #     self.metro_map.add_track()
+        #
+        # elif event.button == 1 and not self.metro_map.node_exists(coordinates, kind='station'):
+        #     radius = (PALETTE_WIDTH // 2)
+        #
+        #     for option in self.opt_to_center:
+        #         if in_circle(radius, self.opt_to_center[option], coordinates):
+        #             self.set_color(option)
+        #             return
+        #     # self.metro_map.add_node(name, colors, coordinates, is_station)
+        #
+        # else:
+        #     return
 
     def create_palette(self) -> None:
         """Draw the palette of colors available to the user to choose
@@ -183,7 +211,7 @@ class Client(User):
 
     def handle_mouse_click(self, event: pygame.event.Event,
                            screen_size: tuple[int, int],
-                           first: bool) -> None:
+                           first: bool, letter: str) -> None:
         pass
 
     def create_palette(self) -> None:
