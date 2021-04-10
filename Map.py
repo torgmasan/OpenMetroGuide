@@ -2,7 +2,7 @@
 """
 from __future__ import annotations
 
-from typing import Optional
+from typing import Optional, Any
 
 from Node import _Node
 import math
@@ -15,7 +15,7 @@ class QueueElement:
     finding the optimized route.
     """
     name: str
-    distance_from_start: float
+    score_from_start: float
     distance_to_destination: float
     total_score: float
     previous_vertex: Optional[QueueElement] = None
@@ -39,7 +39,7 @@ def get_element(node_queue: list[QueueElement], name: str) -> Optional[QueueElem
             return element
 
 
-def update_element(node_queue: list[QueueElement], name: str, new_distance_from_start: float,
+def update_element(node_queue: list[QueueElement], name: str, new_score_from_start: float,
                    new_previous: QueueElement) -> None:
     """Updates the distance between start and element with name if
     new_distance_from_start is less than the previous distance from start.
@@ -47,11 +47,11 @@ def update_element(node_queue: list[QueueElement], name: str, new_distance_from_
     Also update the previous node.
     """
     element = get_element(node_queue, name)
-    new_total_score = new_distance_from_start + element.distance_to_destination
+    new_total_score = new_score_from_start + element.distance_to_destination
 
     if element.total_score > new_total_score:
         element.total_score = new_total_score
-        element.distance_from_start = new_distance_from_start
+        element.score_from_start = new_score_from_start
         element.previous_vertex = new_previous
 
 
@@ -106,10 +106,10 @@ class Map:
             return {node for node in all_nodes if not node.is_station}
 
     def add_node(self, name: str, colors: set[str],
-                 coordinates: tuple[float, float], is_station: bool) -> None:
+                 coordinates: tuple[float, float], is_station: bool, zone: Any) -> None:
         """Add a node to the map.
         """
-        self._nodes[name] = _Node(name, colors, coordinates, is_station)
+        self._nodes[name] = _Node(name, colors, coordinates, is_station, zone)
 
     def add_track(self, name_1: str, name_2: str) -> None:
         """Add a weighted track to the map.
@@ -134,7 +134,7 @@ class Map:
                 return True
         return False
 
-    def get_track_length(self, name_1: str, name_2: str) -> float:
+    def get_track_weight(self, name_1: str, name_2: str, optimization: str) -> float:
         """Return the weight of the track between two nodes.
 
         Raise ValueError if no such track exists.
@@ -146,16 +146,17 @@ class Map:
             neighboring_stations = node_1.get_neighbours()
 
             if node_2 in neighboring_stations:
-                wt = node_1.get_weight(node_2)
+                wt = node_1.get_weight(node_2, optimization)
                 return wt
 
         raise ValueError
 
-    def get_track_cost(self, name_1: str, name_2: str) -> float:
-        pass
-
-    def optimized_route(self, start: str, destination: str) -> list[str]:
+    def optimized_route(self, start: str, destination: str, optimization: str) -> list[str]:
         """Return the most optimized route using the Dijkstra Algorithm.
+        Runs the optimization depending on what the option entered is.
+
+        Preconditions:
+            optimization in {'distance', 'cost'}
         """
         start_node = self.get_node(start)
         end_node = self.get_node(destination)
@@ -170,11 +171,11 @@ class Map:
             tmp_node = self._nodes[curr_element.name]
 
             for node in tmp_node.get_neighbours():
-                to_add = self.get_track_length(tmp_node.name, node.name)
+                to_add = self.get_track_weight(tmp_node.name, node.name, optimization)
 
                 if get_element(node_queue, node.name) is not None:
                     update_element(node_queue, node.name,
-                                   to_add + curr_element.distance_from_start, curr_element)
+                                   to_add + curr_element.score_from_start, curr_element)
                 sort_queue(node_queue)
 
         return get_path(curr_element)
