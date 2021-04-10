@@ -47,13 +47,46 @@ def get_click_pos(event: pygame.event.Event) -> tuple[int, int]:
 def approximate_edge_click(event: pygame.event.Event) -> tuple[tuple[int, int], tuple[int, int]]:
     """Return the approximated coordinates of the mouse click for the track.
 
+    https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line
+
     Preconditions:
-        -
+        - 0<= event.pos[0] <= WIDTH
+        - 0 <= event.pos[1] <= HEIGHT
     """
+    x_0, y_0 = event.pos
+
+    all_edges = _get_all_edges(event)
+
+    min_distance_so_far = math.inf
+    closest_edge_so_far = None
+
+    for edge in all_edges:
+        x_1, y_1 = edge[0]
+        x_2, y_2 = edge[1]
+
+        distance_from_edge = abs((x_2 - x_1) * (y_1 - y_0) - (x_1 - x_0) * (y_2 - y_1)
+                                 ) / math.sqrt((x_2 - x_1) ** 2 - (y_2 - y_1) ** 2)
+
+        if distance_from_edge < min_distance_so_far:
+            min_distance_so_far = distance_from_edge
+            closest_edge_so_far = edge
+
+    return closest_edge_so_far
 
 
 def _get_all_edges(event: pygame.event.Event) -> list[tuple[tuple[int, int], tuple[int, int]]]:
-    """Return all edges in the box of the grid where the mous"""
+    """event is a pygame mouse click event object in one of the boxes of the grid.
+
+    Return all edges in the box of the click (including the boundary edges).
+    """
+    top_left = ((event.pos[0] // GRID_SIZE) * GRID_SIZE,
+                (event.pos[1] // GRID_SIZE) * GRID_SIZE)
+    top_right = (top_left[0] + GRID_SIZE, top_left[1])
+    bottom_left = (top_left[0], top_left[1] + GRID_SIZE)
+    bottom_right = (top_left[0] + GRID_SIZE, top_left[1] + GRID_SIZE)
+
+    return [(top_left, top_right), (top_left, bottom_left), (bottom_left, bottom_right),
+            (top_right, bottom_right), (top_left, bottom_right), (top_right, bottom_left)]
 
 
 def initialize_screen(screen_size: tuple[int, int], allowed: list) -> pygame.Surface:
