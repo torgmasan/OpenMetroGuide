@@ -135,7 +135,7 @@ class Admin(User):
         """
         coordinates = get_click_pos(event)
 
-        if coordinates[0] > WIDTH:
+        if event.pos[0] > WIDTH:
             radius = (PALETTE_WIDTH // 2)
 
             for option in self.opt_to_center:
