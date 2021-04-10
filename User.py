@@ -3,15 +3,12 @@
 from pygame.colordict import THECOLORS
 import pygame
 from canvas_utils import GRID_SIZE, get_click_pos, initialize_screen, \
-    BLACK, in_circle
+    BLACK, in_circle, WIDTH, HEIGHT, PALETTE_WIDTH
 import sys
 
 from Map import Map
 from Node import _Node
 
-WIDTH = 800
-HEIGHT = 800
-PALETTE_WIDTH = 50
 LINE_COLORS = ['blue', 'red', 'yellow', 'green', 'brown', 'purple', 'orange',
                'pink']
 
@@ -114,8 +111,9 @@ class Admin(User):
                             1: left-click, 3: right-click
 
         The screen_size is a tuple of (width, height), and should be used together with
-        event.pos to determine which cell is being clicked. If a click happens exactly on
-        the boundary between two cells, you may decide which cell is selected.
+        event.pos to determine which cell is being clicked.
+
+        If the click is within the area
 
         Preconditions:
             - event.type == pygame.MOUSEBUTTONDOWN
@@ -123,32 +121,29 @@ class Admin(User):
             - screen_size[1] >= 200
         """
         coordinates = get_click_pos(event)
-        radius = (PALETTE_WIDTH // 2)
 
-        for option in self.opt_to_center:
-            if in_circle(radius, self.opt_to_center[option], coordinates):
-                self.set_color(option)
-                return
+        name = ...
+        colors = ...
+        is_station = ...
 
-        # name = ...
-        # colors = ...
-        # is_station = ...
-        #
-        # if coordinates[0] % GRID_SIZE != 0 or coordinates[1] % GRID_SIZE != 0:
-        #     return
-        #
-        # elif event.button == 3 and first and self.metro_map.node_exists(coordinates, kind='station'):
-        #     event_2 = pygame.event.wait()
-        #     self.handle_mouse_click(event_2, screen_size, not first)
-        #
-        # elif event.button == 3 and not first and self.metro_map.node_exists(coordinates, kind='station'):
-        #     self.metro_map.add_track()
-        #
-        # elif event.button == 1 and not self.metro_map.node_exists(coordinates, kind='station'):
-        #     self.metro_map.add_node(name, colors, coordinates, is_station)
-        #
-        # else:
-        #     return
+        if event.button == 3 and first and self.metro_map.node_exists(coordinates, kind='station'):
+            event_2 = pygame.event.wait()
+            self.handle_mouse_click(event_2, screen_size, not first)
+
+        elif event.button == 3 and not first and self.metro_map.node_exists(coordinates, kind='station'):
+            self.metro_map.add_track()
+
+        elif event.button == 1 and not self.metro_map.node_exists(coordinates, kind='station'):
+            radius = (PALETTE_WIDTH // 2)
+
+            for option in self.opt_to_center:
+                if in_circle(radius, self.opt_to_center[option], coordinates):
+                    self.set_color(option)
+                    return
+            # self.metro_map.add_node(name, colors, coordinates, is_station)
+
+        else:
+            return
 
     def create_palette(self) -> None:
         """Draw the palette of colors available to the user to choose

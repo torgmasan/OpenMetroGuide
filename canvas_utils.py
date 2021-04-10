@@ -6,6 +6,10 @@ constants regarding pygame rendering."""
 import pygame
 import math
 
+WIDTH = 800
+HEIGHT = 800
+PALETTE_WIDTH = 50
+
 
 INSTRUCT_ADMIN = ["Left click on a point in the grid to add a Metro Station or a",
                   "Node to the Map. Additional Left click deletes Node/Station.",
