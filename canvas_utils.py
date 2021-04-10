@@ -35,9 +35,21 @@ def draw_text(screen: pygame.Surface, text: str, font: int, pos: tuple[int, int]
 
 
 def get_click_pos(event: pygame.event.Event) -> tuple[int, int]:
-    """Returns the coordinates of the mouse click"""
+    """Return the approximated coordinates of the mouse click for the station"""
     return (round(event.pos[0] / GRID_SIZE) * GRID_SIZE,
             round(event.pos[1] / GRID_SIZE) * GRID_SIZE)
+
+
+def approximate_edge_click(event: pygame.event.Event) -> tuple[tuple[int, int], tuple[int, int]]:
+    """Return the approximated coordinates of the mouse click for the track.
+
+    Preconditions:
+        -
+    """
+
+
+def _get_all_edges(event: pygame.event.Event) -> list[tuple[tuple[int, int], tuple[int, int]]]:
+    """Return all edges in the box of the grid where the mous"""
 
 
 def initialize_screen(screen_size: tuple[int, int], allowed: list) -> pygame.Surface:
