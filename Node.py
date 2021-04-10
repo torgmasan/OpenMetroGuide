@@ -41,7 +41,7 @@ class _Node:
     def add_track(self, node_2: _Node):
         """Adds track between two nodes"""
         weight_1 = self.get_distance(node_2)
-        weight_2 = self.get_cost(node_2)
+        weight_2 = self.count_zones(node_2)
         self._neighbouring_nodes[node_2] = weight_1, weight_2
         node_2._neighbouring_nodes[self] = weight_1, weight_2
 
@@ -54,6 +54,9 @@ class _Node:
     def get_weight(self, node2: _Node, optimization: str) -> float:
         """Returns the weight between two nodes. This weight could
         be either in terms of the distance or the cost unit between the nodes.
+
+        Preconditions:
+            - optimization in {'distance', 'cost'}
         """
         if optimization == 'distance':
             return self._neighbouring_nodes[node2][0]
@@ -69,9 +72,9 @@ class _Node:
         weight = math.sqrt((x2 - x1) ** 2 - (y2 - y1) ** 2)
         return weight
 
-    def get_cost(self, destination_node: _Node) -> int:
+    def count_zones(self, destination_node: _Node) -> int:
         """Returns the cost in terms of base units (where a base unit
-        is the prince from two nodes in the same zone."""
+        is the price from two nodes in the same zone)."""
         if self.zone == destination_node.zone:
             return 1
         else:
