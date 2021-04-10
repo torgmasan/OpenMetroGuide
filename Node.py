@@ -69,7 +69,7 @@ class _Node:
         """
         x1, x2 = self.coordinates[0], destination_node.coordinates[0]
         y1, y2 = self.coordinates[1], destination_node.coordinates[1]
-        weight = math.sqrt((x2 - x1) ** 2 - (y2 - y1) ** 2)
+        weight = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
         return weight
 
     def count_zones(self, destination_node: _Node) -> int:

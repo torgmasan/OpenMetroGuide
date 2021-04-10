@@ -40,8 +40,8 @@ def draw_text(screen: pygame.Surface, text: str, font: int, pos: tuple[int, int]
 
 def get_click_pos(event: pygame.event.Event) -> tuple[int, int]:
     """Return the approximated coordinates of the mouse click for the station"""
-    return (round(event.pos[0] / GRID_SIZE) * GRID_SIZE,
-            round(event.pos[1] / GRID_SIZE) * GRID_SIZE)
+    return (round(event.pos[0] / (WIDTH // GRID_SIZE)) * (WIDTH // GRID_SIZE),
+            round(event.pos[1] / (HEIGHT // GRID_SIZE)) * (HEIGHT // GRID_SIZE))
 
 
 def approximate_edge_click(event: pygame.event.Event) -> tuple[tuple[int, int], tuple[int, int]]:
@@ -64,8 +64,10 @@ def approximate_edge_click(event: pygame.event.Event) -> tuple[tuple[int, int], 
         x_1, y_1 = edge[0]
         x_2, y_2 = edge[1]
 
-        distance_from_edge = abs((x_2 - x_1) * (y_1 - y_0) - (x_1 - x_0) * (y_2 - y_1)
-                                 ) / math.sqrt((x_2 - x_1) ** 2 - (y_2 - y_1) ** 2)
+        num = abs((x_2 - x_1) * (y_1 - y_0) - (x_1 - x_0) * (y_2 - y_1))
+        den = math.sqrt((x_2 - x_1) ** 2 + (y_2 - y_1) ** 2)
+
+        distance_from_edge = num / den
 
         if distance_from_edge < min_distance_so_far:
             min_distance_so_far = distance_from_edge
@@ -79,11 +81,11 @@ def _get_all_edges(event: pygame.event.Event) -> list[tuple[tuple[int, int], tup
 
     Return all edges in the box of the click (including the boundary edges).
     """
-    top_left = ((event.pos[0] // GRID_SIZE) * GRID_SIZE,
-                (event.pos[1] // GRID_SIZE) * GRID_SIZE)
-    top_right = (top_left[0] + GRID_SIZE, top_left[1])
-    bottom_left = (top_left[0], top_left[1] + GRID_SIZE)
-    bottom_right = (top_left[0] + GRID_SIZE, top_left[1] + GRID_SIZE)
+    top_left = ((event.pos[0] // (WIDTH // GRID_SIZE)) * (WIDTH // GRID_SIZE),
+                (event.pos[1] // (HEIGHT // GRID_SIZE)) * (HEIGHT // GRID_SIZE))
+    top_right = (top_left[0] + WIDTH // GRID_SIZE, top_left[1])
+    bottom_left = (top_left[0], top_left[1] + HEIGHT // GRID_SIZE)
+    bottom_right = (top_left[0] + WIDTH // GRID_SIZE, top_left[1] + HEIGHT // GRID_SIZE)
 
     return [(top_left, top_right), (top_left, bottom_left), (bottom_left, bottom_right),
             (top_right, bottom_right), (top_left, bottom_right), (top_right, bottom_left)]

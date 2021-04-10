@@ -145,7 +145,7 @@ class Admin(User):
         else:
             if event.button == 3:
                 line_coordinates = approximate_edge_click(event)
-                pygame.draw.line(self._screen, self._curr_opt, line_coordinates[0], line_coordinates[2], 3)
+                pygame.draw.line(self._screen, self._curr_opt, line_coordinates[0], line_coordinates[1], 3)
             elif event.button == 1:
                 pass
             else:
