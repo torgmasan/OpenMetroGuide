@@ -1,10 +1,10 @@
 """i have no thoughts
 """
-
+from typing import Any
 from pygame.colordict import THECOLORS
 import pygame
 from canvas_utils import GRID_SIZE, get_click_pos, initialize_screen, approximate_edge_click, \
-    BLACK, in_circle, WIDTH, HEIGHT, PALETTE_WIDTH
+    WHITE, BLACK, in_circle, WIDTH, HEIGHT, PALETTE_WIDTH, draw_text
 import sys
 
 from Map import Map
@@ -179,6 +179,59 @@ class Admin(User):
                            radius - 5, 5)
 
 
+def get_station_info() -> tuple[str, str]:
+    """Gets the information from the admin
+        about the station such as the
+        name and zone.
+    """
+    pygame.init()
+    screen = pygame.display.set_mode((700, 200))
+    screen.fill(WHITE)
+
+    pygame.display.set_caption('Station Information')
+    name = ''
+    zone = ''
+    chk = True
+    while chk:
+
+        screen.fill(WHITE)
+        _refresh_input_display(screen)
+
+        for event in pygame.event.get():
+
+            if event.type == pygame.QUIT:
+                sys.exit()
+
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RETURN:
+                    chk = False
+                    break
+
+                # elif event.key == event.unicode:
+                #     name += event.unicode
+
+        if not chk:
+            break
+
+        pygame.display.flip()
+
+    return (name, zone)
+
+
+def _refresh_input_display(screen: pygame.Surface) -> None:
+    """Displays all the textboxes asking the user for the
+    name and zone of each station when added. This screen is always
+    displayed.
+    """
+    draw_text(screen, 'Enter the name of the Station ->', 27, (5, 50))
+    pygame.draw.rect(screen, BLACK, (295, 47, 400, 25), 3)
+
+    draw_text(screen, 'Enter the zone of the Station ->', 27, (5, 120))
+    pygame.draw.rect(screen, BLACK, (295, 117, 400, 25), 3)
+
+    return
+
+
 class Client(User):
     """Hello, I am the follower"""
 
@@ -210,3 +263,6 @@ class Client(User):
         selected one.
         """
         pass
+
+    if __name__ == '__main__':
+        get_station_info()
