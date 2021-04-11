@@ -20,6 +20,7 @@ class User:
     _screen: pygame.Surface
     _curr_opt: str
     opt_to_center: dict[str: tuple[int, int]]
+    active_nodes: set[_Node]
 
     def __init__(self, init_selected: str):
         self.metro_map = Map()
@@ -140,15 +141,45 @@ class Admin(User):
         else:
             if event.button == 3:
                 line_coordinates = approximate_edge_click(event)
-                pygame.draw.line(self._screen, self._curr_opt, line_coordinates[0],
-                                 line_coordinates[1], 3)
+                n_1 = self.metro_map.node_exists(line_coordinates[0])
+                n_2 = self.metro_map.node_exists(line_coordinates[1])
+                if n_1 is None and n_2 is not None:
+                    n_1 = _Node(name=str(line_coordinates[0]), is_station=False,
+                                coordinates=line_coordinates[0], zone='')
+                    self.active_nodes.add(n_1)
+                    n_1.add_track(n_2, self._curr_opt)
+                elif n_1 is not None and n_2 is None:
+                    n_2 = _Node(name=str(line_coordinates[1]), is_station=False,
+                                coordinates=line_coordinates[1], zone='')
+                    self.active_nodes.add(n_2)
+                    n_1.add_track(n_2, self._curr_opt)
+                elif n_1 is None and n_2 is None:
+                    n_1 = _Node(name=str(line_coordinates[0]), is_station=False,
+                                coordinates=line_coordinates[0], zone='')
+                    n_2 = _Node(name=str(line_coordinates[1]), is_station=False,
+                                coordinates=line_coordinates[1], zone='')
+                    self.active_nodes.add(n_1)
+                    self.active_nodes.add(n_2)
+                    n_1.add_track(n_2, self._curr_opt)
+                elif n_1 is not None and n_2 is not None:
+                    n_1.remove_track(n_2)
+                    if n_1.get_neighbours() == set() and not n_1.is_station:
+                        self.active_nodes.remove(n_1)
+                    if n_2.get_neighbours() == set() and not n_2.is_station:
+                        self.active_nodes.remove(n_2)
+
+                # pygame.draw.line(self._screen, self._curr_opt, line_coordinates[0],
+                #                  line_coordinates[1], 3)
             elif event.button == 1:
-                if self.metro_map.node_exists(coordinates):
-                    pass
+                if self.metro_map.node_exists(coordinates) is None:
+                    name, zone = get_station_info()
+                    new_station = _Node(name, coordinates, True, zone)
+                    self.active_nodes.add(new_station)
+
                     # TODO: We need to stop drawing objects here.
                     # TODO: instead, keep a log of what items are being drawn and on every loop
                     # TODO: draw only those items.
-                pygame.draw.circle(self._screen, BLACK, coordinates, 5)
+                # pygame.draw.circle(self._screen, BLACK, coordinates, 5)
             else:
                 return
 
