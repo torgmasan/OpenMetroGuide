@@ -28,6 +28,7 @@ class User:
                                          [pygame.MOUSEBUTTONDOWN])
         self.opt_to_center = {}
         self._curr_opt = init_selected
+        self.active_nodes = set()
 
         while True:
             self.draw_grid()
@@ -246,7 +247,7 @@ def get_station_info() -> tuple[str, str]:
 
         pygame.display.flip()
 
-    return (name, zone)
+    return name, zone
 
 
 def _refresh_input_display(screen: pygame.Surface) -> None:
