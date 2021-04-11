@@ -105,13 +105,13 @@ class Map:
         else:
             return {node for node in all_nodes if not node.is_station}
 
-    def add_node(self, name: str, colors: set[str],
+    def add_node(self, name: str,
                  coordinates: tuple[float, float], is_station: bool, zone: Any) -> None:
         """Add a node to the map.
         """
-        self._nodes[name] = _Node(name, colors, coordinates, is_station, zone)
+        self._nodes[name] = _Node(name, coordinates, is_station, zone)
 
-    def add_track(self, name_1: str, name_2: str) -> None:
+    def add_track(self, name_1: str, name_2: str, color: str) -> None:
         """Add a weighted track to the map.
 
         If any are absent, raise ValueError.
@@ -119,11 +119,11 @@ class Map:
         if name_1 and name_2 in self._nodes:
             node_1 = self._nodes[name_1]
             node_2 = self._nodes[name_2]
-            node_1.add_track(node_2)
+            node_1.add_track(node_2, color)
         else:
             raise ValueError
 
-    def node_exists(self, coordinates: tuple[float, float], kind: str = '') -> bool:
+    def node_exists(self, coordinates: tuple[float, float], kind: str = '') -> Optional[_Node]:
         """Return whether a node already exists at the given coordinates.
 
         Preconditions:
@@ -131,8 +131,8 @@ class Map:
         """
         for node in self._nodes:
             if self._nodes[node].coordinates == coordinates:
-                return True
-        return False
+                return self._nodes[node]
+        return None
 
     def get_track_weight(self, name_1: str, name_2: str, optimization: str) -> float:
         """Return the weight of the track between two nodes.

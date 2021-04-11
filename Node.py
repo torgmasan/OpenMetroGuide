@@ -22,28 +22,33 @@ class _Node:
     #    - _neighbouring_nodes: The nodes which are adjacent to the current node
     #    and their corresponding weights with the current node.
     name: str
-    colors: set[str]
+    # colors: set[str]
     is_station: bool
-    _neighbouring_nodes: dict[_Node, tuple[float, int]]
+    _neighbouring_nodes: dict[_Node, tuple[float, int, str]]
     coordinates: tuple[float, float]
     zone: Any
 
-    def __init__(self, name: str, colors: set[str],
+    def __init__(self, name: str,
                  coordinates: tuple[float, float], is_station: bool, zone: Any) -> None:
         """Initialize a new Station object."""
         self.name = name
         self._neighbouring_nodes = {}
-        self.colors = colors
+        # self.colors = colors
         self.coordinates = coordinates
         self.is_station = is_station
         self.zone = zone
 
-    def add_track(self, node_2: _Node):
+    def add_track(self, node_2: _Node, color: str):
         """Adds track between two nodes"""
         weight_1 = self.get_distance(node_2)
         weight_2 = self.count_zones(node_2)
-        self._neighbouring_nodes[node_2] = weight_1, weight_2
-        node_2._neighbouring_nodes[self] = weight_1, weight_2
+        self._neighbouring_nodes[node_2] = weight_1, weight_2, color
+        node_2._neighbouring_nodes[self] = weight_1, weight_2, color
+
+    def remove_track(self, node_2: _Node):
+        """Remove track between self and node_2"""
+        self._neighbouring_nodes.pop(node_2)
+        node_2._neighbouring_nodes.pop(self)
 
     def get_neighbours(self) -> set[_Node]:
         """Gets the neighboring nodes of the station,
@@ -75,7 +80,8 @@ class _Node:
     def count_zones(self, destination_node: _Node) -> int:
         """Returns the cost in terms of base units (where a base unit
         is the price from two nodes in the same zone)."""
-        if self.zone == destination_node.zone:
+        if self.zone == destination_node.zone or self.zone == ''\
+                or destination_node.zone == '':
             return 1
         else:
             return 2
