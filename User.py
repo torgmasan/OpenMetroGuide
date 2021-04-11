@@ -171,10 +171,15 @@ class Admin(User):
                 # pygame.draw.line(self._screen, self._curr_opt, line_coordinates[0],
                 #                  line_coordinates[1], 3)
             elif event.button == 1:
-                if self.metro_map.node_exists(coordinates) is None:
+                station = self.metro_map.node_exists(coordinates)
+                if station is None:
                     name, zone = get_station_info()
-                    new_station = _Node(name, coordinates, True, zone)
-                    self.active_nodes.add(new_station)
+                    station = _Node(name, coordinates, True, zone)
+                    self.active_nodes.add(station)
+                else:
+                    for neighbour in station.get_neighbours():
+                        station.remove_track(neighbour)
+                    self.active_nodes.remove(station)
 
                     # TODO: We need to stop drawing objects here.
                     # TODO: instead, keep a log of what items are being drawn and on every loop
