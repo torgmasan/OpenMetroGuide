@@ -51,7 +51,8 @@ class User:
         """Draws a square grid on the given surface.
 
         The drawn grid has GRID_SIZE columns and rows.
-        You can use this to help you check whether you are drawing nodes and edges in the right spots.
+        You can use this to help you check whether you are drawing nodes and edges
+        at the right spots.
         """
         color = THECOLORS['grey']
         width, height = WIDTH, HEIGHT
@@ -96,7 +97,9 @@ class User:
 class Admin(User):
     """Hello, I am the Creator"""
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initializes the Instance Attributes of the child class of User.
+        """
         super(Admin, self).__init__('blue')
 
     def set_color(self, new_color: str):
@@ -123,10 +126,10 @@ class Admin(User):
         If the click is within the area of the palette, then check if it is within any color and
         handle accordingly.
 
-        If the click is within the grid, check if the click is left or right. A right click is handled
-        by creating a track. If left click and the letter 'S' or 'C' is being pressed, a station or a corner
-        is created respectively. Delete an existing track by right clicking on it, and delete a corner/station by
-        left clicking on it.
+        If the click is within the grid, check if the click is left or right.
+        A right click is handled by creating a track. If left click and the letter 'S' or 'C'
+        is being pressed, a station or a corner is created respectively. Delete an existing track
+        by right clicking on it, and delete a corner/station by left clicking on it.
 
         Preconditions:
             - event.type == pygame.MOUSEBUTTONDOWN
@@ -145,7 +148,8 @@ class Admin(User):
         else:
             if event.button == 3:
                 line_coordinates = approximate_edge_click(event)
-                pygame.draw.line(self._screen, self._curr_opt, line_coordinates[0], line_coordinates[1], 3)
+                pygame.draw.line(self._screen, self._curr_opt, line_coordinates[0],
+                                 line_coordinates[1], 3)
             elif event.button == 1:
                 pass
             else:
@@ -154,11 +158,13 @@ class Admin(User):
         # colors = ...
         # is_station = ...
         #
-        # if event.button == 3 and first and self.metro_map.node_exists(coordinates, kind='station'):
+        # if event.button == 3 and first and
+        # self.metro_map.node_exists(coordinates, kind='station'):
         #     event_2 = pygame.event.wait()
         #     self.handle_mouse_click(event_2, screen_size, not first)
         #
-        # elif event.button == 3 and not first and self.metro_map.node_exists(coordinates, kind='station'):
+        # elif event.button == 3 and not first and
+        # self.metro_map.node_exists(coordinates, kind='station'):
         #     self.metro_map.add_track()
         #
         # elif event.button == 1 and not self.metro_map.node_exists(coordinates, kind='station'):
@@ -205,16 +211,24 @@ class Client(User):
 
     _curr_optimization: str
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """ Initializes the Instance Attributes of
+        the Client class which is a child of User.
+        """
         super(Client, self).__init__()
         self._curr_optimization = 'distance'
 
     def handle_mouse_click(self, event: pygame.event.Event,
                            screen_size: tuple[int, int],
                            first: bool, letter: str) -> None:
+        """ Handles what happens once the client clicks the mouse.
+        ...
+        """
         pass
 
     def create_palette(self) -> None:
+        """ ...
+        """
         pass
 
     def set_selection(self, palette_choice: str) -> None:
