@@ -80,7 +80,8 @@ class _Node:
     def count_zones(self, destination_node: _Node) -> int:
         """Returns the cost in terms of base units (where a base unit
         is the price from two nodes in the same zone)."""
-        if self.zone == destination_node.zone:
+        if self.zone == destination_node.zone or self.zone == ''\
+                or destination_node.zone == '':
             return 1
         else:
             return 2
