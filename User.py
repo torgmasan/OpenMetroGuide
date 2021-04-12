@@ -1,4 +1,5 @@
-"""i have no thoughts
+"""
+This file contains the hierarchy of class User and its children Admin and Client.
 """
 from pygame.colordict import THECOLORS
 import pygame
@@ -92,7 +93,11 @@ class User:
 
 
 class Admin(User):
-    """Hello, I am the Creator"""
+    """Admin is the aspect of the User which creates the metro map
+    using pygame mouse click event objects. Once the map has been created
+    on the screen, it is converted to a Map object. If the metro map is not connected,
+    the Admin is given the option of editing the map again.
+    """
 
     def __init__(self) -> None:
         """Initializes the Instance Attributes of the child class of User.
@@ -339,7 +344,11 @@ def _refresh_input_display(screen: pygame.Surface,
 
 
 class Client(User):
-    """Hello, I am the follower"""
+    """Client is the aspect of the User which displays a Map object on the screen,
+    and then uses pygame mouse click event objects to determine the Client's
+    starting point and final destination, and the variable of optimization the Client
+    prefers. Then, the best possible route between the two stations is highlighted.
+    """
 
     _curr_optimization: str
 
