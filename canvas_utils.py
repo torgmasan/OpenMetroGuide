@@ -95,7 +95,7 @@ def _get_all_edges(event: pygame.event.Event) -> list[tuple[tuple[int, int], tup
             (top_right, bottom_right), (top_left, bottom_right), (top_right, bottom_left)]
 
 
-def initialize_screen(screen_size: tuple[int, int], allowed: list) -> pygame.Surface:
+def initialize_screen(screen_size: tuple[int, int]) -> pygame.Surface:
     """Initialize pygame and the display window.
 
     allowed is a list of pygame event types that should be listened for while pygame is running.
@@ -105,10 +105,6 @@ def initialize_screen(screen_size: tuple[int, int], allowed: list) -> pygame.Sur
     screen = pygame.display.set_mode(screen_size)
     screen.fill(WHITE)
     pygame.display.flip()
-
-    pygame.event.clear()
-    pygame.event.set_blocked(None)
-    pygame.event.set_allowed([pygame.QUIT] + allowed)
 
     return screen
 

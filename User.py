@@ -23,8 +23,7 @@ class User:
 
     def __init__(self, init_selected: str) -> None:
         self.metro_map = Map()
-        self._screen = initialize_screen((WIDTH + PALETTE_WIDTH, HEIGHT),
-                                         [pygame.MOUSEBUTTONDOWN, pygame.KEYDOWN])
+        self._screen = initialize_screen((WIDTH + PALETTE_WIDTH, HEIGHT))
         self.opt_to_center = {}
         self._curr_opt = init_selected
         self.active_nodes = set()
@@ -224,65 +223,66 @@ class Admin(User):
         screen = pygame.display.set_mode((700, 200))
         screen.fill(WHITE)
 
-    base_font = pygame.font.Font(None, 32)
-    pygame.display.set_caption('Station Information')
-    name = ''
-    zone = ''
-    name_active = False
-    zone_active = False
-    chk = True
-    while chk:
+        base_font = pygame.font.Font(None, 32)
+        pygame.display.set_caption('Station Information')
+        name = ''
+        zone = ''
+        name_active = False
+        zone_active = False
+        chk = True
+        while chk:
 
-        screen.fill(WHITE)
-        name_rect, zone_rect = _refresh_input_display(screen, name_active, zone_active)
+            screen.fill(WHITE)
+            name_rect, zone_rect = _refresh_input_display(screen, name_active, zone_active)
 
-        for event in pygame.event.get():
+            for event in pygame.event.get():
 
-            if event.type == pygame.QUIT:
+                if event.type == pygame.QUIT:
+                    sys.exit()
+
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if name_rect.collidepoint(event.pos):
+                        name_active = True
+                        zone_active = False
+
+                    if zone_rect.collidepoint(event.pos):
+                        zone_active = True
+                        name_active = False
+
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_RETURN:
+                        chk = False
+                        break
+
+                    if event.key == pygame.K_BACKSPACE:
+
+                        if zone_active:
+                            zone = zone[:-1]
+
+                        elif name_active:
+                            name = name[:-1]
+
+                    else:
+
+                        if zone_active:
+                            zone += event.unicode
+
+                        if name_active:
+                            name += event.unicode
+
+            if not chk:
                 new_admin = Admin()
                 new_admin.__dict__ = self.__dict__.copy()
                 station = _Node(name, coordinates, True, zone)
                 new_admin.active_nodes.add(station)
                 new_admin.display()
+                break
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if name_rect.collidepoint(event.pos):
-                    name_active = True
-                    zone_active = False
-
-                if zone_rect.collidepoint(event.pos):
-                    zone_active = True
-                    name_active = False
-
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
-                    chk = False
-                    break
-
-                if event.key == pygame.K_BACKSPACE:
-
-                    if zone_active:
-                        zone = zone[:-1]
-
-                    elif name_active:
-                        name = name[:-1]
-
-                else:
-
-                    if zone_active:
-                        zone += event.unicode
-
-                    if name_active:
-                        name += event.unicode
-
-        if not chk:
-            break
-
-        name_surface = base_font.render(name, True, (0, 0, 0))
-        zone_surface = base_font.render(zone, True, (0, 0, 0))
-        screen.blit(name_surface, (name_rect.x + 5, name_rect.y + 2.5))
-        screen.blit(zone_surface, (zone_rect.x + 5, zone_rect.y + 2.5))
-        pygame.display.flip()
+            name_surface = base_font.render(name, True, (0, 0, 0))
+            zone_surface = base_font.render(zone, True, (0, 0, 0))
+            screen.blit(name_surface, (name_rect.x + 5, name_rect.y + 2.5))
+            screen.blit(zone_surface, (zone_rect.x + 5, zone_rect.y + 2.5))
+            pygame.display.flip()
 
 
 def _refresh_input_display(screen: pygame.Surface,
