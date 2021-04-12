@@ -1,6 +1,7 @@
 """i have no thoughts
 """
 from typing import Any
+
 from pygame.colordict import THECOLORS
 import pygame
 from canvas_utils import GRID_SIZE, get_click_pos, initialize_screen, approximate_edge_click, \
@@ -25,12 +26,14 @@ class User:
     def __init__(self, init_selected: str):
         self.metro_map = Map()
         self._screen = initialize_screen((WIDTH + PALETTE_WIDTH, HEIGHT),
-                                         [pygame.MOUSEBUTTONDOWN])
+                                         [pygame.MOUSEBUTTONDOWN, pygame.KEYDOWN])
         self.opt_to_center = {}
         self._curr_opt = init_selected
         self.active_nodes = set()
 
-    def disp(self):
+    def display(self):
+        """Responsible for refreshing the screen and displaying required edges and nodes
+        onto the map."""
         while True:
             self.draw_grid()
             self.create_palette()
@@ -175,9 +178,7 @@ class Admin(User):
             elif event.button == 1:
                 station = self.metro_map.node_exists(coordinates)
                 if station is None:
-                    name, zone = get_station_info(self)
-                    station = _Node(name, coordinates, True, zone)
-                    self.active_nodes.add(station)
+                    self.get_station_info(coordinates)
                 else:
                     for neighbour in station.get_neighbours():
                         station.remove_track(neighbour)
@@ -216,58 +217,78 @@ class Admin(User):
         pygame.draw.circle(self._screen, BLACK, target,
                            radius - 5, 5)
 
-
-def get_station_info(admin: User) -> tuple[str, str]:
-    """Gets the information from the admin
-        about the station such as the
-        name and zone.
-    """
-    pygame.init()
-    screen = pygame.display.set_mode((700, 200))
-    screen.fill(WHITE)
-
-    pygame.display.set_caption('Station Information')
-    name = ''
-    zone = ''
-    chk = True
-    while chk:
-
+    def get_station_info(self, coordinates: tuple[int, int]) -> None:
+        """Gets the information from the admin
+            about the station such as the
+            name and zone.
+        """
+        pygame.init()
+        screen = pygame.display.set_mode((700, 200))
         screen.fill(WHITE)
-        _refresh_input_display(screen)
 
-        for event in pygame.event.get():
+        pygame.display.set_caption('Station Information')
+        name = ''
+        zone = ''
 
-            if event.type == pygame.QUIT:
-                new_admin = Admin()
-                new_admin.__dict__ = admin.__dict__.copy()
-                new_admin.disp()
+        name_input = pygame.Rect(295, 47, 400, 25)
+        zone_input = pygame.Rect(295, 117, 400, 25)
+        name_active, zone_active = False, False
+        while True:
 
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_RETURN:
-                    chk = False
-                    break
+            screen.fill(WHITE)
 
-                # elif event.key == event.unicode:
-                #     name += event.unicode
+            for event in pygame.event.get():
 
-        if not chk:
-            break
+                if event.type == pygame.QUIT:
+                    new_admin = Admin()
+                    new_admin.__dict__ = self.__dict__.copy()
+                    station = _Node(name, coordinates, True, zone)
+                    new_admin.active_nodes.add(station)
+                    new_admin.display()
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if name_input.collidepoint(event.pos):
+                        name_active = True
+                        zone_active = False
+                    elif zone_input.collidepoint(event.pos):
+                        name_active = False
+                        zone_active = True
+                elif event.type == pygame.KEYDOWN:
+                    if zone_active and event.unicode.isalnum():
+                        zone += event.unicode
+                    else:
+                        print(event.unicode)
+                    if name_active and event.unicode.isalnum():
+                        name += event.unicode
+                    if event.key == pygame.K_BACKSPACE:
+                        if zone_active:
+                            zone = zone[:-1]
+                        else:
+                            name = name[:-1]
 
-        pygame.display.flip()
+            font = pygame.font.SysFont('inconsolata', 20)
+            name_surface = font.render(name, True, BLACK)
+            zone_surface = font.render(zone, True, BLACK)
 
-    return name, zone
+            screen.blit(name_surface, (name_input.x + 5, name_input.y + 5))
+            screen.blit(zone_surface, (zone_input.x + 5, zone_input.y + 5))
+
+            _refresh_input_display(screen, name_input, zone_input)
+
+            pygame.event.pump()
+            pygame.display.flip()
 
 
-def _refresh_input_display(screen: pygame.Surface) -> None:
+def _refresh_input_display(screen: pygame.Surface, name_input: pygame.Rect,
+                           zone_input: pygame.Rect) -> None:
     """Displays all the textboxes asking the user for the
     name and zone of each station when added. This screen is always
     displayed.
     """
     draw_text(screen, 'Enter the name of the Station ->', 27, (5, 50))
-    pygame.draw.rect(screen, BLACK, (295, 47, 400, 25), 3)
+    pygame.draw.rect(screen, BLACK, name_input, 3)
 
     draw_text(screen, 'Enter the zone of the Station ->', 27, (5, 120))
-    pygame.draw.rect(screen, BLACK, (295, 117, 400, 25), 3)
+    pygame.draw.rect(screen, BLACK, zone_input, 3)
 
     return
 
@@ -303,6 +324,3 @@ class Client(User):
         selected one.
         """
         pass
-
-    if __name__ == '__main__':
-        get_station_info()
