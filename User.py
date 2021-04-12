@@ -30,6 +30,7 @@ class User:
         self._curr_opt = init_selected
         self.active_nodes = set()
 
+    def disp(self):
         while True:
             self.draw_grid()
             self.create_palette()
@@ -174,7 +175,7 @@ class Admin(User):
             elif event.button == 1:
                 station = self.metro_map.node_exists(coordinates)
                 if station is None:
-                    name, zone = get_station_info()
+                    name, zone = get_station_info(self)
                     station = _Node(name, coordinates, True, zone)
                     self.active_nodes.add(station)
                 else:
@@ -216,7 +217,7 @@ class Admin(User):
                            radius - 5, 5)
 
 
-def get_station_info() -> tuple[str, str]:
+def get_station_info(admin: User) -> tuple[str, str]:
     """Gets the information from the admin
         about the station such as the
         name and zone.
@@ -237,7 +238,9 @@ def get_station_info() -> tuple[str, str]:
         for event in pygame.event.get():
 
             if event.type == pygame.QUIT:
-                sys.exit()
+                new_admin = Admin()
+                new_admin.__dict__ = admin.__dict__.copy()
+                new_admin.disp()
 
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
