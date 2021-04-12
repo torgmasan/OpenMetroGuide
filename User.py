@@ -1,6 +1,8 @@
 """
 This file contains the hierarchy of class User and its children Admin and Client.
 """
+from typing import Optional
+
 from pygame.colordict import THECOLORS
 import pygame
 from canvas_utils import GRID_SIZE, get_click_pos, initialize_screen, approximate_edge_click, \
@@ -33,14 +35,15 @@ class User:
         """Responsible for refreshing the screen and displaying required edges and nodes
         onto the map."""
         while True:
+            self._screen.fill(WHITE)
             self.draw_grid()
             self.create_palette()
             self.set_selection(self._curr_opt)
 
-            for node in self.active_nodes:
-                self.metro_map.add_node(node.name, node.coordinates, node.is_station, node.zone)
+            # for node in self.active_nodes:
+            #     self.metro_map.add_node(node.name, node.coordinates, node.is_station, node.zone)
 
-            for node in self.metro_map.get_all_nodes():
+            for node in self.active_nodes:
                 if node.is_station:
                     pygame.draw.circle(self._screen, BLACK, node.coordinates, 5)
 
@@ -51,6 +54,17 @@ class User:
                     self.handle_mouse_click(event, (WIDTH, HEIGHT), False)
 
             pygame.display.update()
+
+    def node_exists(self, coordinates: tuple[float, float], kind: str = '') -> Optional[_Node]:
+        """Return the node if it exists at given coordinates. Else, return None.
+
+        Preconditions:
+            - kind in {'', 'station', 'corner'}
+        """
+        for node in self.active_nodes:
+            if node.coordinates == coordinates:
+                return node
+        return None
 
     def draw_grid(self) -> None:
         """Draws a square grid on the given surface.
@@ -157,8 +171,8 @@ class Admin(User):
         else:  # The click is on the map
             if event.button == 3:  # Right-click is for track
                 line_coordinates = approximate_edge_click(event)
-                n_1 = self.metro_map.node_exists(line_coordinates[0])
-                n_2 = self.metro_map.node_exists(line_coordinates[1])
+                n_1 = self.node_exists(line_coordinates[0])
+                n_2 = self.node_exists(line_coordinates[1])
 
                 # One of the nodes already exists, the other node has to be created and linked to
                 # the pre-existing node
@@ -205,18 +219,14 @@ class Admin(User):
                 #                  line_coordinates[1], 3)
 
             elif event.button == 1:  # Left-click is for the nodes (station or corner)
-                try:
-                    station = self.metro_map.node_exists(coordinates)
-                    if station is None:
-                        self.get_station_info(coordinates)
-                    else:
-                        for neighbour in station.get_neighbours():
-                            station.remove_track(neighbour)
-                        self.active_nodes.remove(station)
-                except KeyError:
-                    print('HI')
+                station = self.node_exists(coordinates)
+                if station is None:
+                    self.get_station_info(coordinates)
+                else:
+                    for neighbour in station.get_neighbours():
+                        station.remove_track(neighbour)
 
-                # pygame.draw.circle(self._screen, BLACK, coordinates, 5)
+                    self.active_nodes.remove(station)
 
             else:
                 return
@@ -304,11 +314,10 @@ class Admin(User):
                             name += event.unicode
 
             if not chk:
-                new_admin = Admin()
-                new_admin.__dict__ = self.__dict__.copy()
+                initialize_screen((WIDTH + PALETTE_WIDTH, HEIGHT))
                 station = _Node(name, coordinates, True, zone)
-                new_admin.active_nodes.add(station)
-                new_admin.display()
+                self.active_nodes.add(station)
+                self.display()
                 break
 
             name_surface = base_font.render(name, True, (0, 0, 0))
