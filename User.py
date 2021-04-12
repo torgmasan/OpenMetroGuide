@@ -1,6 +1,6 @@
 """i have no thoughts
 """
-from typing import Any
+from typing import Any, Optional
 from pygame.colordict import THECOLORS
 import pygame
 from canvas_utils import GRID_SIZE, get_click_pos, initialize_screen, approximate_edge_click, \
@@ -22,13 +22,16 @@ class User:
     opt_to_center: dict[str: tuple[int, int]]
     active_nodes: set[_Node]
 
-    def __init__(self, init_selected: str):
+    def __init__(self, init_selected: str) -> None:
         self.metro_map = Map()
         self._screen = initialize_screen((WIDTH + PALETTE_WIDTH, HEIGHT),
                                          [pygame.MOUSEBUTTONDOWN])
         self.opt_to_center = {}
         self._curr_opt = init_selected
+        self.active_nodes = set()
 
+    def disp(self) -> None:
+        """Hehehehe Hahahaha HUHUHUHUHUHUH"""
         while True:
             self.draw_grid()
             self.create_palette()
@@ -219,48 +222,98 @@ def get_station_info() -> tuple[str, str]:
     screen = pygame.display.set_mode((700, 200))
     screen.fill(WHITE)
 
+    base_font = pygame.font.Font(None, 32)
     pygame.display.set_caption('Station Information')
     name = ''
     zone = ''
+    name_active = False
+    zone_active = False
     chk = True
     while chk:
 
         screen.fill(WHITE)
-        _refresh_input_display(screen)
+        name_rect, zone_rect = _refresh_input_display(screen, name_active, zone_active)
 
         for event in pygame.event.get():
 
             if event.type == pygame.QUIT:
                 sys.exit()
 
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if name_rect.collidepoint(event.pos):
+                    name_active = True
+                    zone_active = False
+
+                if zone_rect.collidepoint(event.pos):
+                    zone_active = True
+                    name_active = False
+
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     chk = False
                     break
 
-                # elif event.key == event.unicode:
-                #     name += event.unicode
+                if event.key == pygame.K_BACKSPACE:
+
+                    if zone_active:
+                        zone = zone[:-1]
+
+                    elif name_active:
+                        name = name[:-1]
+
+                else:
+
+                    if zone_active:
+                        zone += event.unicode
+
+                    if name_active:
+                        name += event.unicode
 
         if not chk:
             break
 
+        name_surface = base_font.render(name, True, (0, 0, 0))
+        zone_surface = base_font.render(zone, True, (0, 0, 0))
+        screen.blit(name_surface, (name_rect.x + 5, name_rect.y + 2.5))
+        screen.blit(zone_surface, (zone_rect.x + 5, zone_rect.y + 2.5))
         pygame.display.flip()
 
     return (name, zone)
 
 
-def _refresh_input_display(screen: pygame.Surface) -> None:
+def _refresh_input_display(screen: pygame.Surface,
+                           active_name: bool, active_zone: bool) -> tuple[pygame.Rect, pygame.Rect]:
     """Displays all the textboxes asking the user for the
     name and zone of each station when added. This screen is always
     displayed.
     """
-    draw_text(screen, 'Enter the name of the Station ->', 27, (5, 50))
-    pygame.draw.rect(screen, BLACK, (295, 47, 400, 25), 3)
+    active_color = pygame.Color((175, 238, 238))
+    not_active_color = pygame.Color((119, 136, 153))
 
-    draw_text(screen, 'Enter the zone of the Station ->', 27, (5, 120))
-    pygame.draw.rect(screen, BLACK, (295, 117, 400, 25), 3)
+    if active_name:
+        name_rect = pygame.Rect((295, 45, 400, 27))
+        draw_text(screen, 'Enter the name of the Station ->', 27, (5, 50))
+        pygame.draw.rect(screen, active_color, name_rect, 3)
 
-    return
+    else:
+        name_rect = pygame.Rect((295, 45, 400, 27))
+        draw_text(screen, 'Enter the name of the Station ->', 27, (5, 50))
+        pygame.draw.rect(screen, not_active_color, name_rect, 3)
+
+    if active_zone:
+        zone_rect = pygame.Rect((295, 115, 400, 27))
+        draw_text(screen, 'Enter the zone of the Station ->', 27, (5, 120))
+        pygame.draw.rect(screen, active_color, zone_rect, 3)
+
+    else:
+        zone_rect = pygame.Rect((295, 115, 400, 27))
+        draw_text(screen, 'Enter the zone of the Station ->', 27, (5, 120))
+        pygame.draw.rect(screen, not_active_color, zone_rect, 3)
+
+    draw_text(screen, '(Click on name or zone to enter respective info and enter when done)', 20,
+              (150, 170))
+
+    return (name_rect, zone_rect)
 
 
 class Client(User):
