@@ -29,11 +29,11 @@ class _Node:
     # colors: set[str]
     is_station: bool
     _neighbouring_nodes: dict[_Node, tuple[float, int, str]]
-    coordinates: tuple[float, float]
+    coordinates: tuple[int, int]
     zone: Any
 
     def __init__(self, name: str,
-                 coordinates: tuple[float, float], is_station: bool, zone: Any) -> None:
+                 coordinates: tuple[int, int], is_station: bool, zone: Any) -> None:
         """Initialize a new Station object."""
         self.name = name
         self._neighbouring_nodes = {}

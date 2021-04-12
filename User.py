@@ -56,8 +56,10 @@ class User:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit()
-                if event.type == pygame.MOUSEBUTTONDOWN:
+                elif event.type == pygame.MOUSEBUTTONDOWN:
                     self.handle_mouse_click(event, (WIDTH, HEIGHT), False)
+
+            self.hover_display()
 
             pygame.display.update()
 
@@ -118,31 +120,14 @@ class User:
         """
         raise NotImplementedError
 
-    def hover_display(self, event) -> None:
+    def hover_display(self) -> None:
         """Displays the information of the station such as name and zone
         when hovered over by the administrator or the client.
 
-        Preconditions:
-            - event.type == pygame.MOUSEMOTION
         """
-        pygame.init()
         for node in self.active_nodes:
-
-            if node.is_station:
-                station_circle = pygame.draw.circle(self._screen, BLACK, node.coordinates, 5)
-                # Will we have to delete twice(or as many times visited) for this?
-
-                new_screen = pygame.display.set_mode((300, 150))
-                new_screen.fill(WHITE)
-
-                while station_circle.collidepoint(event.pos):
-                    draw_text(screen=new_screen, text='Station - ', font=27, pos=(10, 65))
-                    draw_text(screen=new_screen, text=node.name, font=27, pos=(25, 65))
-
-                    draw_text(screen=new_screen, text='Zone - ', font=27, pos=(10, 135))
-                    draw_text(screen=new_screen, text=node.zone, font=27, pos=(25, 135))
-
-                    pygame.display.flip()
+            if in_circle(5, node.coordinates, pygame.mouse.get_pos()) and node.is_station:
+                draw_text(self._screen, node.name, 17, (node.coordinates[0] + 4, node.coordinates[1] - 15))
 
 
 class Admin(User):
