@@ -217,7 +217,7 @@ class Admin(User):
                            radius - 5, 5)
 
 
-def get_station_info(admin: User) -> tuple[str, str]:
+def get_station_info() -> tuple[str, str]:
     """Gets the information from the admin
         about the station such as the
         name and zone.
@@ -241,9 +241,10 @@ def get_station_info(admin: User) -> tuple[str, str]:
         for event in pygame.event.get():
 
             if event.type == pygame.QUIT:
-                new_admin = Admin()
-                new_admin.__dict__ = admin.__dict__.copy()
-                new_admin.disp()
+                # new_admin = Admin()
+                # new_admin.__dict__ = admin.__dict__.copy()
+                # new_admin.disp()
+                sys.exit()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if name_rect.collidepoint(event.pos):
@@ -254,7 +255,7 @@ def get_station_info(admin: User) -> tuple[str, str]:
                     zone_active = True
                     name_active = False
 
-            elif event.type == pygame.KEYDOWN:
+            if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RETURN:
                     chk = False
                     break
@@ -316,8 +317,8 @@ def _refresh_input_display(screen: pygame.Surface,
         draw_text(screen, 'Enter the zone of the Station ->', 27, (5, 120))
         pygame.draw.rect(screen, not_active_color, zone_rect, 3)
 
-    draw_text(screen, '(Click on name or zone to enter respective info and enter when done)', 20,
-              (150, 170))
+    draw_text(screen, '(Click on name or zone to enter respective info and press enter when done)',
+              20, (150, 170))
 
     return (name_rect, zone_rect)
 
@@ -354,5 +355,6 @@ class Client(User):
         """
         pass
 
-    if __name__ == '__main__':
-        get_station_info()
+
+if __name__ == '__main__':
+    get_station_info()
