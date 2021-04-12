@@ -98,6 +98,32 @@ class User:
         """
         raise NotImplementedError
 
+    def hover_display(self, event) -> None:
+        """Displays the information of the station such as name and zone
+        when hovered over by the administrator or the client.
+
+        Preconditions:
+            - event.type == pygame.MOUSEMOTION
+        """
+        pygame.init()
+        for node in self.active_nodes:
+
+            if node.is_station:
+                station_circle = pygame.draw.circle(self._screen, BLACK, node.coordinates, 5)
+                # Will we have to delete twice(or as many times visited) for this?
+
+                new_screen = pygame.display.set_mode((300, 150))
+                new_screen.fill(WHITE)
+
+                while station_circle.collidepoint(event.pos):
+                    draw_text(screen=new_screen, text='Station - ', font=27, pos=(10, 65))
+                    draw_text(screen=new_screen, text=node.name, font=27, pos=(25, 65))
+
+                    draw_text(screen=new_screen, text='Zone - ', font=27, pos=(10, 135))
+                    draw_text(screen=new_screen, text=node.zone, font=27, pos=(25, 135))
+
+                    pygame.display.flip()
+
 
 class Admin(User):
     """Admin is the aspect of the User which creates the metro map
