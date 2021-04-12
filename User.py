@@ -123,8 +123,10 @@ class Admin(User):
         handle accordingly.
 
         If the click is within the grid, check if the click is left or right.
-        A right click is handled by creating a track. If left click is being pressed, a station created.
-         Delete an existing track by right clicking on it, and delete a corner/station by left clicking on it.
+        A right click is handled by creating a track. If left click is being pressed,
+        a station created. Delete an existing track by right clicking on it, and delete
+        a corner/station by left clicking on it.
+        handle_mouse_click updates and maintains active_nodes.
 
         Preconditions:
             - event.type == pygame.MOUSEBUTTONDOWN
@@ -133,18 +135,21 @@ class Admin(User):
         """
         coordinates = get_click_pos(event)
 
-        if event.pos[0] > WIDTH:
+        if event.pos[0] > WIDTH:  # The click is on the color palette
             radius = (PALETTE_WIDTH // 2)
 
             for option in self.opt_to_center:
                 if in_circle(radius, self.opt_to_center[option], coordinates):
                     self.set_color(option)
                     return
-        else:
-            if event.button == 3:
+        else:  # The click is on the map
+            if event.button == 3:  # Right-click is for track
                 line_coordinates = approximate_edge_click(event)
                 n_1 = self.metro_map.node_exists(line_coordinates[0])
                 n_2 = self.metro_map.node_exists(line_coordinates[1])
+
+                # One of the nodes already exists, the other node has to be created and linked to
+                # the pre-existing node
                 if n_1 is None and n_2 is not None:
                     n_1 = _Node(name=str(line_coordinates[0]), is_station=False,
                                 coordinates=line_coordinates[0], zone='')
@@ -155,6 +160,8 @@ class Admin(User):
                                 coordinates=line_coordinates[1], zone='')
                     self.active_nodes.add(n_2)
                     n_1.add_track(n_2, self._curr_opt)
+
+                # Both nodes need to be created and linked to each other
                 elif n_1 is None and n_2 is None:
                     n_1 = _Node(name=str(line_coordinates[0]), is_station=False,
                                 coordinates=line_coordinates[0], zone='')
@@ -163,16 +170,29 @@ class Admin(User):
                     self.active_nodes.add(n_1)
                     self.active_nodes.add(n_2)
                     n_1.add_track(n_2, self._curr_opt)
+
+                # Both nodes already exist
                 elif n_1 is not None and n_2 is not None:
-                    n_1.remove_track(n_2)
+                    if n_1.is_adjacent(n_2):
+                        # if they already have a track between them, remove the track
+                        n_1.remove_track(n_2)
+                    else:
+                        # else, add a track between them
+                        n_1.add_track(n_2, self._curr_opt)
+
+                    # if either or both of the nodes is a corner and is not connected
+                    # to any other node, remove the node
+
                     if n_1.get_neighbours() == set() and not n_1.is_station:
                         self.active_nodes.remove(n_1)
+
                     if n_2.get_neighbours() == set() and not n_2.is_station:
                         self.active_nodes.remove(n_2)
 
                 # pygame.draw.line(self._screen, self._curr_opt, line_coordinates[0],
                 #                  line_coordinates[1], 3)
-            elif event.button == 1:
+
+            elif event.button == 1:  # Left-click is for the nodes (station or corner)
                 station = self.metro_map.node_exists(coordinates)
                 if station is None:
                     self.get_station_info(coordinates)
@@ -181,10 +201,8 @@ class Admin(User):
                         station.remove_track(neighbour)
                     self.active_nodes.remove(station)
 
-                    # TODO: We need to stop drawing objects here.
-                    # TODO: instead, keep a log of what items are being drawn and on every loop
-                    # TODO: draw only those items.
                 # pygame.draw.circle(self._screen, BLACK, coordinates, 5)
+
             else:
                 return
 

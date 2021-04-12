@@ -16,6 +16,10 @@ class _Node:
         - is_station: Whether the current node is a station or a corner.
         - coordinates: Coordinates of the current station on the grid(graph).
 
+    Representation Invariants:
+        - self not in self._neighbouring_nodes
+        - all(self in u._neighbouring_nodes for u in self._neighbouring_nodes)
+
     """
 
     # Private Instance Attributes:
@@ -38,17 +42,21 @@ class _Node:
         self.is_station = is_station
         self.zone = zone
 
-    def add_track(self, node_2: _Node, color: str):
+    def add_track(self, node_2: _Node, color: str) -> None:
         """Adds track between two nodes"""
         weight_1 = self.get_distance(node_2)
         weight_2 = self.count_zones(node_2)
         self._neighbouring_nodes[node_2] = weight_1, weight_2, color
         node_2._neighbouring_nodes[self] = weight_1, weight_2, color
 
-    def remove_track(self, node_2: _Node):
+    def remove_track(self, node_2: _Node) -> None:
         """Remove track between self and node_2"""
         self._neighbouring_nodes.pop(node_2)
         node_2._neighbouring_nodes.pop(self)
+
+    def is_adjacent(self, node_2: _Node) -> bool:
+        """Return whether self and node_2 are neighbours"""
+        return self in node_2._neighbouring_nodes and node_2 in self._neighbouring_nodes
 
     def get_neighbours(self) -> set[_Node]:
         """Gets the neighboring nodes of the station,
