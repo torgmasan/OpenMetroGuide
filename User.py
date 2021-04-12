@@ -37,6 +37,13 @@ class User:
             self.create_palette()
             self.set_selection(self._curr_opt)
 
+            for node in self.active_nodes:
+                self.metro_map.add_node(node.name, node.coordinates, node.is_station, node.zone)
+
+            for node in self.metro_map.get_all_nodes():
+                if node.is_station:
+                    pygame.draw.circle(self._screen, BLACK, node.coordinates, 5)
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit()
@@ -198,13 +205,16 @@ class Admin(User):
                 #                  line_coordinates[1], 3)
 
             elif event.button == 1:  # Left-click is for the nodes (station or corner)
-                station = self.metro_map.node_exists(coordinates)
-                if station is None:
-                    self.get_station_info(coordinates)
-                else:
-                    for neighbour in station.get_neighbours():
-                        station.remove_track(neighbour)
-                    self.active_nodes.remove(station)
+                try:
+                    station = self.metro_map.node_exists(coordinates)
+                    if station is None:
+                        self.get_station_info(coordinates)
+                    else:
+                        for neighbour in station.get_neighbours():
+                            station.remove_track(neighbour)
+                        self.active_nodes.remove(station)
+                except KeyError:
+                    print('HI')
 
                 # pygame.draw.circle(self._screen, BLACK, coordinates, 5)
 
@@ -340,7 +350,7 @@ def _refresh_input_display(screen: pygame.Surface,
     draw_text(screen, '(Click on name or zone to enter respective info and press enter when done)',
               20, (150, 170))
 
-    return (name_rect, zone_rect)
+    return name_rect, zone_rect
 
 
 class Client(User):
