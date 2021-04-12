@@ -1,6 +1,5 @@
 """i have no thoughts
 """
-from typing import Any, Optional
 from pygame.colordict import THECOLORS
 import pygame
 from canvas_utils import GRID_SIZE, get_click_pos, initialize_screen, approximate_edge_click, \
@@ -174,10 +173,15 @@ class Admin(User):
                 # pygame.draw.line(self._screen, self._curr_opt, line_coordinates[0],
                 #                  line_coordinates[1], 3)
             elif event.button == 1:
-                if self.metro_map.node_exists(coordinates) is None:
-                    name, zone = get_station_info()
-                    new_station = _Node(name, coordinates, True, zone)
-                    self.active_nodes.add(new_station)
+                station = self.metro_map.node_exists(coordinates)
+                if station is None:
+                    name, zone = get_station_info(self)
+                    station = _Node(name, coordinates, True, zone)
+                    self.active_nodes.add(station)
+                else:
+                    for neighbour in station.get_neighbours():
+                        station.remove_track(neighbour)
+                    self.active_nodes.remove(station)
 
                     # TODO: We need to stop drawing objects here.
                     # TODO: instead, keep a log of what items are being drawn and on every loop
@@ -213,7 +217,7 @@ class Admin(User):
                            radius - 5, 5)
 
 
-def get_station_info() -> tuple[str, str]:
+def get_station_info(admin: User) -> tuple[str, str]:
     """Gets the information from the admin
         about the station such as the
         name and zone.
@@ -237,7 +241,9 @@ def get_station_info() -> tuple[str, str]:
         for event in pygame.event.get():
 
             if event.type == pygame.QUIT:
-                sys.exit()
+                new_admin = Admin()
+                new_admin.__dict__ = admin.__dict__.copy()
+                new_admin.disp()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if name_rect.collidepoint(event.pos):
@@ -278,7 +284,7 @@ def get_station_info() -> tuple[str, str]:
         screen.blit(zone_surface, (zone_rect.x + 5, zone_rect.y + 2.5))
         pygame.display.flip()
 
-    return (name, zone)
+    return name, zone
 
 
 def _refresh_input_display(screen: pygame.Surface,
