@@ -43,9 +43,15 @@ class User:
             # for node in self.active_nodes:
             #     self.metro_map.add_node(node.name, node.coordinates, node.is_station, node.zone)
 
+            visited = set()
             for node in self.active_nodes:
+                visited.add(node)
                 if node.is_station:
                     pygame.draw.circle(self._screen, BLACK, node.coordinates, 5)
+                for u in node.get_neighbours():
+                    if u not in visited:
+                        pygame.draw.line(self._screen, node.get_color(u), node.coordinates,
+                                         u.coordinates, 3)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -240,9 +246,6 @@ class Admin(User):
 
                     if n_2.get_neighbours() == set() and not n_2.is_station:
                         self.active_nodes.remove(n_2)
-
-                # pygame.draw.line(self._screen, self._curr_opt, line_coordinates[0],
-                #                  line_coordinates[1], 3)
 
             elif event.button == 1:  # Left-click is for the nodes (station or corner)
                 station = self.node_exists(coordinates)
