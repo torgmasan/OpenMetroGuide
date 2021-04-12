@@ -48,7 +48,7 @@ def run_home() -> None:
 
     if current == 'admin':
         admin = User.Admin()
-        admin.disp()
+        admin.display()
     else:
         User.Client()
 

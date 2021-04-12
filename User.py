@@ -24,13 +24,14 @@ class User:
     def __init__(self, init_selected: str) -> None:
         self.metro_map = Map()
         self._screen = initialize_screen((WIDTH + PALETTE_WIDTH, HEIGHT),
-                                         [pygame.MOUSEBUTTONDOWN])
+                                         [pygame.MOUSEBUTTONDOWN, pygame.KEYDOWN])
         self.opt_to_center = {}
         self._curr_opt = init_selected
         self.active_nodes = set()
 
-    def disp(self) -> None:
-        """Hehehehe Hahahaha HUHUHUHUHUHUH"""
+    def display(self) -> None:
+        """Responsible for refreshing the screen and displaying required edges and nodes
+        onto the map."""
         while True:
             self.draw_grid()
             self.create_palette()
@@ -175,9 +176,7 @@ class Admin(User):
             elif event.button == 1:
                 station = self.metro_map.node_exists(coordinates)
                 if station is None:
-                    name, zone = get_station_info(self)
-                    station = _Node(name, coordinates, True, zone)
-                    self.active_nodes.add(station)
+                    self.get_station_info(coordinates)
                 else:
                     for neighbour in station.get_neighbours():
                         station.remove_track(neighbour)
@@ -216,15 +215,14 @@ class Admin(User):
         pygame.draw.circle(self._screen, BLACK, target,
                            radius - 5, 5)
 
-
-def get_station_info() -> tuple[str, str]:
-    """Gets the information from the admin
-        about the station such as the
-        name and zone.
-    """
-    pygame.init()
-    screen = pygame.display.set_mode((700, 200))
-    screen.fill(WHITE)
+    def get_station_info(self, coordinates: tuple[int, int]) -> None:
+        """Gets the information from the admin
+            about the station such as the
+            name and zone.
+        """
+        pygame.init()
+        screen = pygame.display.set_mode((700, 200))
+        screen.fill(WHITE)
 
     base_font = pygame.font.Font(None, 32)
     pygame.display.set_caption('Station Information')
@@ -241,10 +239,11 @@ def get_station_info() -> tuple[str, str]:
         for event in pygame.event.get():
 
             if event.type == pygame.QUIT:
-                # new_admin = Admin()
-                # new_admin.__dict__ = admin.__dict__.copy()
-                # new_admin.disp()
-                sys.exit()
+                new_admin = Admin()
+                new_admin.__dict__ = self.__dict__.copy()
+                station = _Node(name, coordinates, True, zone)
+                new_admin.active_nodes.add(station)
+                new_admin.display()
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if name_rect.collidepoint(event.pos):
@@ -284,8 +283,6 @@ def get_station_info() -> tuple[str, str]:
         screen.blit(name_surface, (name_rect.x + 5, name_rect.y + 2.5))
         screen.blit(zone_surface, (zone_rect.x + 5, zone_rect.y + 2.5))
         pygame.display.flip()
-
-    return name, zone
 
 
 def _refresh_input_display(screen: pygame.Surface,
@@ -354,7 +351,3 @@ class Client(User):
         selected one.
         """
         pass
-
-
-if __name__ == '__main__':
-    get_station_info()
