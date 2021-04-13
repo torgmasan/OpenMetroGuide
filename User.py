@@ -57,7 +57,7 @@ class User:
                 if event.type == pygame.QUIT:
                     sys.exit()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
-                    self.handle_mouse_click(event, (WIDTH, HEIGHT), False)
+                    self.handle_mouse_click(event, (WIDTH, HEIGHT))
 
             self.hover_display()
 
@@ -100,8 +100,7 @@ class User:
             pygame.draw.line(self._screen, color, (0, y), (width - x, height))
 
     def handle_mouse_click(self, event: pygame.event.Event,
-                           screen_size: tuple[int, int],
-                           first: bool) -> None:
+                           screen_size: tuple[int, int],) -> None:
         """Handle a mouse click event.
 
         This is an abstract method.
@@ -151,7 +150,7 @@ class Admin(User):
         self._curr_opt = new_color
 
     def handle_mouse_click(self, event: pygame.event.Event,
-                           screen_size: tuple[int, int], first: bool) -> None:
+                           screen_size: tuple[int, int]) -> None:
         """Handle a mouse click event.
 
         A pygame mouse click event object has two attributes that are important for this method:
@@ -236,10 +235,9 @@ class Admin(User):
                 station = self.node_exists(coordinates)
                 if station is None:
                     self.get_station_info(coordinates)
-                else:
+                elif station.is_station:
                     for neighbour in station.get_neighbours():
                         station.remove_track(neighbour)
-
                     self.active_nodes.remove(station)
 
             else:
@@ -393,8 +391,7 @@ class Client(User):
         self._curr_optimization = 'distance'
 
     def handle_mouse_click(self, event: pygame.event.Event,
-                           screen_size: tuple[int, int],
-                           first: bool) -> None:
+                           screen_size: tuple[int, int]) -> None:
         """ Handles what happens once the client clicks the mouse.
         ...
         """
