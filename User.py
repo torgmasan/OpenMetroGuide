@@ -54,7 +54,7 @@ class User:
                                          u.coordinates, 3)
 
             if not self.is_proper_map():
-                draw_text(self._screen, 'Map is incomplete', 17, (370, 10))
+                draw_text(self._screen, 'NOT A PROPER METRO MAP', 17, (347, 10))
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -79,7 +79,7 @@ class User:
         and there are stations at both ends of the metro line(s).
         """
         for node_1 in self.active_nodes:
-            if not node_1.is_station and len(node_1.get_neighbours()) < 2:
+            if not node_1.is_station and len(node_1.get_neighbours()) != 2:
                 return False
             for node_2 in self.active_nodes:
                 if not node_1.check_connected(node_2, set()):
