@@ -126,7 +126,8 @@ class User:
         """
         for node in self.active_nodes:
             if in_circle(5, node.coordinates, pygame.mouse.get_pos()) and node.is_station:
-                draw_text(self._screen, node.name, 17, (node.coordinates[0] + 4, node.coordinates[1] - 15))
+                draw_text(self._screen, node.name, 17,
+                          (node.coordinates[0] + 4, node.coordinates[1] - 15))
 
 
 class Admin(User):
@@ -239,6 +240,9 @@ class Admin(User):
                     for neighbour in station.get_neighbours():
                         station.remove_track(neighbour)
                     self.active_nodes.remove(station)
+                else:
+                    self.active_nodes.remove(station)
+                    self.get_station_info(coordinates, station)
 
             else:
                 return
@@ -269,10 +273,13 @@ class Admin(User):
         pygame.draw.circle(self._screen, BLACK, target,
                            radius - 5, 5)
 
-    def get_station_info(self, coordinates: tuple[int, int]) -> None:
-        """Gets the information from the admin
-            about the station such as the
-            name and zone.
+    def get_station_info(self, coordinates: tuple[int, int],
+                         replace: Optional[_Node] = None) -> None:
+        """Gets the information from the admin about the station such as the name and zone
+         and creates a new station.
+
+         If replace is not None, then tracks are added between the new station and the
+         neighbours of replace.
         """
         pygame.init()
         screen = pygame.display.set_mode((700, 200))
@@ -328,6 +335,12 @@ class Admin(User):
             if not chk:
                 initialize_screen((WIDTH + PALETTE_WIDTH, HEIGHT))
                 station = _Node(name, coordinates, True, zone)
+
+                if replace is not None:
+                    for neighbour in replace.get_neighbours():
+                        station.add_track(neighbour, replace.get_color(neighbour))
+                        replace.remove_track(neighbour)
+
                 self.active_nodes.add(station)
                 self.display()
                 break
