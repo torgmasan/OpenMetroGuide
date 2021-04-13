@@ -53,6 +53,9 @@ class User:
                         pygame.draw.line(self._screen, node.get_color(u), node.coordinates,
                                          u.coordinates, 3)
 
+            if not self.is_proper_map():
+                draw_text(self._screen, 'Map is incomplete', 17, (370, 10))
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit()
@@ -63,16 +66,25 @@ class User:
 
             pygame.display.update()
 
-    def node_exists(self, coordinates: tuple[float, float], kind: str = '') -> Optional[_Node]:
+    def node_exists(self, coordinates: tuple[float, float]) -> Optional[_Node]:
         """Return the node if it exists at given coordinates. Else, return None.
-
-        Preconditions:
-            - kind in {'', 'station', 'corner'}
         """
         for node in self.active_nodes:
             if node.coordinates == coordinates:
                 return node
         return None
+
+    def is_proper_map(self) -> bool:
+        """Return whether the nodes in self.active_nodes form a connected map
+        and there are stations at both ends of the metro line(s).
+        """
+        for node_1 in self.active_nodes:
+            if not node_1.is_station and len(node_1.get_neighbours()) < 2:
+                return False
+            for node_2 in self.active_nodes:
+                if not node_1.check_connected(node_2, set()):
+                    return False
+        return True
 
     def draw_grid(self) -> None:
         """Draws a square grid on the given surface.
@@ -234,13 +246,17 @@ class Admin(User):
 
             elif event.button == 1:  # Left-click is for the nodes (station or corner)
                 station = self.node_exists(coordinates)
+
                 if station is None:
+                    # create new station
                     self.get_station_info(coordinates)
                 elif station.is_station:
+                    # remove the station and the tracks it is part of
                     for neighbour in station.get_neighbours():
                         station.remove_track(neighbour)
                     self.active_nodes.remove(station)
                 else:
+                    # replace the corner with a station
                     self.active_nodes.remove(station)
                     self.get_station_info(coordinates, station)
 
@@ -292,12 +308,18 @@ class Admin(User):
         name_active = False
         zone_active = False
         chk = True
+        chk_2 = False
         while chk:
 
             screen.fill(WHITE)
-            name_rect, zone_rect = _refresh_input_display(screen, name_active, zone_active)
+            name_rect, zone_rect = _refresh_input_display(screen, name_active, zone_active, chk_2)
 
             for event in pygame.event.get():
+
+                chk_2 = False
+                for node in self.active_nodes:
+                    if node.name == name:
+                        chk_2 = True
 
                 if event.type == pygame.QUIT:
                     sys.exit()
@@ -313,10 +335,11 @@ class Admin(User):
 
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN:
-                        chk = False
-                        break
+                        chk = chk_2 or name == '' or zone == ''
+                        if not chk:
+                            break
 
-                    if event.key == pygame.K_BACKSPACE:
+                    elif event.key == pygame.K_BACKSPACE:
 
                         if zone_active:
                             zone = zone[:-1]
@@ -353,7 +376,8 @@ class Admin(User):
 
 
 def _refresh_input_display(screen: pygame.Surface,
-                           active_name: bool, active_zone: bool) -> tuple[pygame.Rect, pygame.Rect]:
+                           active_name: bool, active_zone: bool,
+                           check: bool) -> tuple[pygame.Rect, pygame.Rect]:
     """Displays all the textboxes asking the user for the
     name and zone of each station when added. This screen is always
     displayed.
@@ -383,6 +407,9 @@ def _refresh_input_display(screen: pygame.Surface,
 
     draw_text(screen, '(Click on name or zone to enter respective info and press enter when done)',
               20, (150, 170))
+
+    if check:
+        draw_text(screen, 'Station with this name already exists', 20, (5, 70))
 
     return name_rect, zone_rect
 

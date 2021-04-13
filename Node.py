@@ -62,6 +62,23 @@ class _Node:
         """Return whether self and node_2 are neighbours"""
         return self in node_2._neighbouring_nodes and node_2 in self._neighbouring_nodes
 
+    def check_connected(self, node_2: _Node, visited: set[_Node]) -> bool:
+        """Return whether this node is connected to node_2,
+        WITHOUT using any of the vertices in visited.
+
+        Preconditions:
+            - self not in visited
+        """
+        if self.name == node_2.name:
+            return True
+        else:
+            visited.add(self)
+            for u in self._neighbouring_nodes:
+                if u not in visited:
+                    if u.check_connected(node_2, visited):
+                        return True
+            return False
+
     def get_color(self, node_2: _Node) -> str:
         """Return the color of the track between self and node_2
 
