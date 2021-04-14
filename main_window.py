@@ -48,7 +48,7 @@ def run_home() -> None:
         pygame.display.flip()
 
     if current == 'admin':
-        admin = User.Admin(Map())
+        admin = User.Admin()
         admin.display()
     else:
         User.Client()
