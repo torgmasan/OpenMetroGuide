@@ -18,29 +18,14 @@ LINE_COLORS = ['blue', 'red', 'yellow', 'green', 'brown', 'purple', 'orange',
 
 class User:
     """ummm i"m just here for the lols"""
-    metro_map: Map
     _screen: pygame.Surface
     _curr_opt: str
     opt_to_center: dict[str: tuple[int, int]]
-    active_nodes: set[_Node]
 
     def __init__(self, init_selected: str) -> None:
-        self.metro_map = Map()
         self._screen = initialize_screen((WIDTH + PALETTE_WIDTH, HEIGHT))
         self.opt_to_center = {}
         self._curr_opt = init_selected
-        self.active_nodes = set()
-
-    def node_exists(self, coordinates: tuple[float, float], kind: str = '') -> Optional[_Node]:
-        """Return the node if it exists at given coordinates. Else, return None.
-
-        Preconditions:
-            - kind in {'', 'station', 'corner'}
-        """
-        for node in self.active_nodes:
-            if node.coordinates == coordinates:
-                return node
-        return None
 
     def draw_grid(self) -> None:
         """Draws a square grid on the given surface.
@@ -67,38 +52,6 @@ class User:
             pygame.draw.line(self._screen, color, (x, 0), (width, height - y))
             pygame.draw.line(self._screen, color, (0, y), (width - x, height))
 
-    def display(self) -> None:
-        """Responsible for refreshing the screen and displaying required edges and nodes
-        onto the map."""
-        while True:
-            self._screen.fill(WHITE)
-            self.draw_grid()
-            self.create_palette()
-            self.set_selection(self._curr_opt)
-
-            # for node in self.active_nodes:
-            #     self.metro_map.add_node(node.name, node.coordinates, node.is_station, node.zone)
-
-            visited = set()
-            for node in self.active_nodes:
-                visited.add(node)
-                if node.is_station:
-                    pygame.draw.circle(self._screen, BLACK, node.coordinates, 5)
-                for u in node.get_neighbours():
-                    if u not in visited:
-                        pygame.draw.line(self._screen, node.get_color(u), node.coordinates,
-                                         u.coordinates, 3)
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    sys.exit()
-                elif event.type == pygame.MOUSEBUTTONDOWN:
-                    self.handle_mouse_click(event, (WIDTH, HEIGHT))
-
-            self.hover_display()
-
-            pygame.display.update()
-
     def handle_mouse_click(self, event: pygame.event.Event,
                            screen_size: tuple[int, int],) -> None:
         """Handle a mouse click event.
@@ -119,15 +72,20 @@ class User:
         """
         raise NotImplementedError
 
+    def display(self) -> None:
+        """Responsible for refreshing the screen and displaying required edges and nodes
+        onto the map."""
+        raise NotImplementedError
+
     def hover_display(self) -> None:
-        """Displays the information of the station such as name and zone
+        """Displays the information of the station
         when hovered over by the administrator or the client.
 
+        The amount of information provided and the means of gaining this
+        information is different in both scenarios.
+
         """
-        for node in self.active_nodes:
-            if in_circle(5, node.coordinates, pygame.mouse.get_pos()) and node.is_station:
-                draw_text(self._screen, node.name, 17,
-                          (node.coordinates[0] + 4, node.coordinates[1] - 15))
+        raise NotImplementedError
 
 
 class Admin(User):
@@ -136,11 +94,64 @@ class Admin(User):
     on the screen, it is converted to a Map object. If the metro map is not connected,
     the Admin is given the option of editing the map again.
     """
+    active_nodes: set[_Node]
 
-    def __init__(self) -> None:
+    def __init__(self, input_map: Map = None) -> None:
         """Initializes the Instance Attributes of the child class of User.
         """
         super(Admin, self).__init__('blue')
+        self.active_nodes = input_map.get_all_nodes()
+
+    def display(self) -> None:
+        """Performs the display of the screen for an Admin"""
+        while True:
+            self._screen.fill(WHITE)
+            self.draw_grid()
+            self.create_palette()
+            self.set_selection(self._curr_opt)
+
+            visited = set()
+            for node in self.active_nodes:
+                visited.add(node)
+                if node.is_station:
+                    pygame.draw.circle(self._screen, BLACK, node.coordinates, 5)
+                for u in node.get_neighbours():
+                    if u not in visited:
+                        pygame.draw.line(self._screen, node.get_color(u), node.coordinates,
+                                         u.coordinates, 3)
+
+            if not self.is_proper_map():
+                draw_text(self._screen, 'NOT A PROPER METRO MAP', 17, (347, 10))
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    self.handle_mouse_click(event, (WIDTH, HEIGHT))
+
+            self.hover_display()
+
+            pygame.display.update()
+
+    def node_exists(self, coordinates: tuple[float, float]) -> Optional[_Node]:
+        """Return the node if it exists at given coordinates. Else, return None.
+        """
+        for node in self.active_nodes:
+            if node.coordinates == coordinates:
+                return node
+        return None
+
+    def is_proper_map(self) -> bool:
+        """Return whether the nodes in self.active_nodes form a connected map
+        and there are stations at both ends of the metro line(s).
+        """
+        for node_1 in self.active_nodes:
+            if not node_1.is_station and len(node_1.get_neighbours()) != 2:
+                return False
+            for node_2 in self.active_nodes:
+                if not node_1.check_connected(node_2, set()):
+                    return False
+        return True
 
     def set_color(self, new_color: str):
         """Set color of track/node created.
@@ -149,6 +160,15 @@ class Admin(User):
             - new_color in LINE_COLORS
         """
         self._curr_opt = new_color
+
+    def hover_display(self) -> None:
+        """Gains the current nodes which can be displayed through
+        the self.active_nodes attribute. Provides information on both name and zone."""
+        for node in self.active_nodes:
+            if in_circle(5, node.coordinates, pygame.mouse.get_pos()) and node.is_station:
+                show = node.name + ' ' + '(' + node.zone + ')'
+                draw_text(self._screen, show, 17,
+                          (node.coordinates[0] + 4, node.coordinates[1] - 15))
 
     def handle_mouse_click(self, event: pygame.event.Event,
                            screen_size: tuple[int, int]) -> None:
@@ -234,13 +254,17 @@ class Admin(User):
 
             elif event.button == 1:  # Left-click is for the nodes (station or corner)
                 station = self.node_exists(coordinates)
+
                 if station is None:
+                    # create new station
                     self.get_station_info(coordinates)
                 elif station.is_station:
+                    # remove the station and the tracks it is part of
                     for neighbour in station.get_neighbours():
                         station.remove_track(neighbour)
                     self.active_nodes.remove(station)
                 else:
+                    # replace the corner with a station
                     self.active_nodes.remove(station)
                     self.get_station_info(coordinates, station)
 
@@ -292,12 +316,18 @@ class Admin(User):
         name_active = False
         zone_active = False
         chk = True
+        chk_2 = False
         while chk:
 
             screen.fill(WHITE)
-            name_rect, zone_rect = _refresh_input_display(screen, name_active, zone_active)
+            name_rect, zone_rect = _refresh_input_display(screen, name_active, zone_active, chk_2)
 
             for event in pygame.event.get():
+
+                chk_2 = False
+                for node in self.active_nodes:
+                    if node.name == name:
+                        chk_2 = True
 
                 if event.type == pygame.QUIT:
                     sys.exit()
@@ -313,10 +343,11 @@ class Admin(User):
 
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_RETURN:
-                        chk = False
-                        break
+                        chk = chk_2 or name == '' or zone == ''
+                        if not chk:
+                            break
 
-                    if event.key == pygame.K_BACKSPACE:
+                    elif event.key == pygame.K_BACKSPACE:
 
                         if zone_active:
                             zone = zone[:-1]
@@ -353,7 +384,8 @@ class Admin(User):
 
 
 def _refresh_input_display(screen: pygame.Surface,
-                           active_name: bool, active_zone: bool) -> tuple[pygame.Rect, pygame.Rect]:
+                           active_name: bool, active_zone: bool,
+                           check: bool) -> tuple[pygame.Rect, pygame.Rect]:
     """Displays all the textboxes asking the user for the
     name and zone of each station when added. This screen is always
     displayed.
@@ -384,6 +416,9 @@ def _refresh_input_display(screen: pygame.Surface,
     draw_text(screen, '(Click on name or zone to enter respective info and press enter when done)',
               20, (150, 170))
 
+    if check:
+        draw_text(screen, 'Station with this name already exists', 20, (5, 70))
+
     return name_rect, zone_rect
 
 
@@ -395,13 +430,14 @@ class Client(User):
     """
 
     _curr_optimization: str
+    metro_map: Map
 
-    def __init__(self) -> None:
+    def __init__(self, input_map: Map) -> None:
         """ Initializes the Instance Attributes of
         the Client class which is a child of User.
         """
         super(Client, self).__init__('distance')
-        self._curr_optimization = 'distance'
+        self.metro_map = input_map
 
     def handle_mouse_click(self, event: pygame.event.Event,
                            screen_size: tuple[int, int]) -> None:
@@ -461,8 +497,9 @@ class Client(User):
 
     def _connect_final_route(self, path: list[str]) -> None:
         """Displays the final path to be displayed
-        highlighting the tracks being used."""
+        highlighting the tracks being used.
         ...
+        """
 
     def create_palette(self) -> None:
         """ ...
@@ -491,3 +528,13 @@ class Client(User):
 
         pygame.draw.circle(self._screen, BLACK, target,
                            radius - 5, 5)
+
+    def display(self) -> None:
+        """...
+        """
+        pass
+
+    def hover_display(self) -> None:
+        """...
+        """
+        pass

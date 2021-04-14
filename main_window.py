@@ -1,5 +1,6 @@
 import pygame
 import User
+from Map import Map
 from canvas_utils import draw_text, WHITE, BLACK, \
     INSTRUCT_CLIENT, INSTRUCT_ADMIN
 import sys
@@ -47,7 +48,7 @@ def run_home() -> None:
         pygame.display.flip()
 
     if current == 'admin':
-        admin = User.Admin()
+        admin = User.Admin(Map())
         admin.display()
     else:
         client = User.Client()
