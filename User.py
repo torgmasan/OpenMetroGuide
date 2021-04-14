@@ -96,11 +96,11 @@ class Admin(User):
     """
     active_nodes: set[_Node]
 
-    def __init__(self) -> None:
+    def __init__(self, input_map: Map = None) -> None:
         """Initializes the Instance Attributes of the child class of User.
         """
         super(Admin, self).__init__('blue')
-        self.active_nodes = set()
+        self.active_nodes = input_map.get_all_nodes()
 
     def display(self) -> None:
         """Performs the display of the screen for an Admin"""
@@ -166,7 +166,7 @@ class Admin(User):
         the self.active_nodes attribute. Provides information on both name and zone."""
         for node in self.active_nodes:
             if in_circle(5, node.coordinates, pygame.mouse.get_pos()) and node.is_station:
-                show = node.name + '(' + node.zone + ')'
+                show = node.name + ' ' + '(' + node.zone + ')'
                 draw_text(self._screen, show, 17,
                           (node.coordinates[0] + 4, node.coordinates[1] - 15))
 
@@ -430,13 +430,14 @@ class Client(User):
     """
 
     _curr_optimization: str
+    metro_map: Map
 
-    def __init__(self) -> None:
+    def __init__(self, input_map: Map) -> None:
         """ Initializes the Instance Attributes of
         the Client class which is a child of User.
         """
-        super(Client, self).__init__()
-        self._curr_optimization = 'distance'
+        super(Client, self).__init__('distance')
+        self.metro_map = input_map
 
     def handle_mouse_click(self, event: pygame.event.Event,
                            screen_size: tuple[int, int]) -> None:
@@ -454,5 +455,15 @@ class Client(User):
         """Darkens the borders of the selected optimization from the palette provided.
         Also changes self._curr_optimization that represents the selected option to the
         selected one.
+        """
+        pass
+
+    def display(self) -> None:
+        """...
+        """
+        pass
+
+    def hover_display(self) -> None:
+        """...
         """
         pass
