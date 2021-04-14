@@ -106,7 +106,7 @@ class Map:
             return {node for node in all_nodes if not node.is_station}
 
     def add_node(self, name: str,
-                 coordinates: tuple[float, float], is_station: bool, zone: Any) -> None:
+                 coordinates: tuple[int, int], is_station: bool, zone: Any) -> None:
         """Add a node to the map.
         """
         self._nodes[name] = _Node(name, coordinates, is_station, zone)
@@ -143,7 +143,8 @@ class Map:
 
         raise ValueError
 
-    def optimized_route(self, start: str, destination: str, optimization: str) -> list[str]:
+    def optimized_route(self, start: str, destination: str,
+                        optimization: str = 'distance') -> list[str]:
         """Return the most optimized route using the Dijkstra Algorithm.
         Runs the optimization depending on what the option entered is.
 

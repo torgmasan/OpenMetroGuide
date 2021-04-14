@@ -50,7 +50,8 @@ def run_home() -> None:
         admin = User.Admin()
         admin.display()
     else:
-        User.Client()
+        client = User.Client()
+        client.display()
 
 
 def refresh_display(screen: pygame.Surface, screen_type: int, current: str = None) -> None:
