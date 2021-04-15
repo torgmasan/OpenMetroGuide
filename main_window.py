@@ -51,7 +51,8 @@ def run_home() -> None:
         admin = User.Admin(Map())
         admin.display()
     else:
-        client = User.Client()
+        m = Map()
+        client = User.Client(m)
         client.display()
 
 

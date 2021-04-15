@@ -53,7 +53,7 @@ class User:
             pygame.draw.line(self._screen, color, (0, y), (width - x, height))
 
     def handle_mouse_click(self, event: pygame.event.Event,
-                           screen_size: tuple[int, int],) -> None:
+                           screen_size: tuple[int, int], ) -> None:
         """Handle a mouse click event.
 
         This is an abstract method.
@@ -429,7 +429,6 @@ class Client(User):
     prefers. Then, the best possible route between the two stations is highlighted.
     """
 
-    _curr_optimization: str
     metro_map: Map
 
     def __init__(self, input_map: Map) -> None:
@@ -446,12 +445,12 @@ class Client(User):
 
         Right click = Destination Station
         """
+        pygame.init()
         click_coordinates = get_click_pos(event)
-        left_selected = False   # Making a provision that the start station NEEDS to be selected
+        left_selected = False  # Making a provision that the start station NEEDS to be selected
         # before the destination station is. (Can be removed if not required)
         start_station = ''
         destination_station = ''
-        optimization_choice = ''
 
         if click_coordinates[0] > WIDTH:
             radius = (PALETTE_WIDTH // 2)
@@ -463,56 +462,99 @@ class Client(User):
                     return
         else:
 
-            for station in self.active_nodes:
+            for station in self.metro_map.get_all_nodes('station'):
 
-                if station.is_station and in_circle(5, station.coordinates, click_coordinates):
+                if in_circle(5, station.coordinates, click_coordinates):
 
                     if event.button == 1:
                         left_selected = True
-                        from_rect = pygame.Rect(station.coordinates[0] - 2, station.coordinates[1] - 2,
-                                                station.coordinates[0] + 9, station.coordinates[1] + 10)
-                        pygame.draw.rect(surface=self._screen, color=(144, 238, 144), rect=from_rect)
+                        from_rect = pygame.Rect(station.coordinates[0] - 2,
+                                                station.coordinates[1] - 2,
+                                                station.coordinates[0] + 9,
+                                                station.coordinates[1] + 10)
+                        pygame.draw.rect(surface=self._screen, color=(144, 238, 144),
+                                         rect=from_rect)
                         # Enter the color you want
                         draw_text(screen=self._screen, text='From', font=4, pos=(
-                                    station.coordinates[0] - 2, station.coordinates[1] + 8))
+                            station.coordinates[0] - 2, station.coordinates[1] + 8))
                         start_station = station.name
 
                     elif event.button == 3 and left_selected:
-                        to_rect = pygame.Rect(station.coordinates[0] - 2, station.coordinates[1] - 2,
-                                                station.coordinates[0] + 9, station.coordinates[1] + 10)
+                        to_rect = pygame.Rect(station.coordinates[0] - 2,
+                                              station.coordinates[1] - 2,
+                                              station.coordinates[0] + 9,
+                                              station.coordinates[1] + 10)
                         pygame.draw.rect(surface=self._screen, color=(144, 238, 144), rect=to_rect)
                         # Enter the color you want
                         draw_text(screen=self._screen, text='To', font=4, pos=(
                             station.coordinates[0] + 2, station.coordinates[1] + 8))
                         destination_station = station.name
 
-                    else:   # Makes a screen stating that destination was selected before start.
-                        ...
+                    else:  # Makes a screen stating that destination was selected before start.
+                        chk = True
+                        temp_screen = pygame.display.set_mode((50, 10))
+                        temp_screen.fill(WHITE)
 
-            optimization_choice = self._curr_opt
-            final_route = self.metro_map.optimized_route(start_station,
-                                                         destination_station, optimization_choice)
-            # connect_final_route(final_route)    # Method to display the final route.
+                        while chk:
+                            temp_screen.fill(WHITE)
+                            draw_text(screen=temp_screen, text='Start station was not selected',
+                                      font=10, pos=(5, 5))
+
+                            for event in pygame.event.get():
+                                if event.type == pygame.QUIT:
+                                    chk = False
+                                    break
+
+                                elif event.type == pygame.MOUSEBUTTONDOWN:
+                                    chk = False
+                                    break
+
+                            if not chk:
+                                return
+
+                continue
+
+            if start_station != '':
+                final_route = self.metro_map.optimized_route(start_station,
+                                                             destination_station,
+                                                             self._curr_opt)
+
+                self._connect_final_route(final_route)
         return
 
     def _connect_final_route(self, path: list[str]) -> None:
         """Displays the final path to be displayed
         highlighting the tracks being used.
-        ...
         """
+
+        for i in range(0, len(path) - 1):
+            node = self.metro_map.get_node(path[i])
+
+            for neighbours in node.get_neighbours():
+
+                if neighbours.name == path[i + 1]:
+                    color = THECOLORS[node.get_color(neighbours)]
+                    pygame.draw.line(surface=self._screen, color=color, start_pos=node.coordinates,
+                                     end_pos=neighbours.coordinates, width=3)
+
+                else:
+                    pygame.draw.line(surface=self._screen, color=THECOLORS['gray'],
+                                     start_pos=node.coordinates, end_pos=neighbours.coordinates)
+
+        return
 
     def create_palette(self) -> None:
         """ ...
         """
         radius = (PALETTE_WIDTH // 2)
-        ht = 4 * radius
+        ht = 10 * radius
 
-        pygame.draw.circle(self._screen, (175, 238, 238), (WIDTH + radius, ht), radius)
-        draw_text(screen=self._screen, text='Distance', font=10, pos=(WIDTH + radius - 5, ht))
+        pygame.draw.circle(self._screen, (175, 238, 238), (WIDTH + radius, ht), radius - 5)
+        draw_text(screen=self._screen, text='Distance', font=20, pos=(WIDTH + radius - 5, ht))
         self.opt_to_center['distance'] = (WIDTH + radius, ht)
 
-        pygame.draw.circle(self._screen, (175, 238, 238), (WIDTH + radius, 2 * ht), radius)
-        draw_text(screen=self._screen, text='Distance', font=10, pos=(WIDTH + radius - 5, ht))
+        pygame.draw.circle(self._screen, (175, 238, 238), (WIDTH + radius, 2 * ht), radius - 5)
+        draw_text(screen=self._screen, text='Distance', font=20, pos=(WIDTH + radius - 5, ht))
         self.opt_to_center['cost'] = (WIDTH + radius, 2 * ht)
 
         # The colors are blue for now just to check the positions of the circles and the text.
@@ -530,11 +572,38 @@ class Client(User):
                            radius - 5, 5)
 
     def display(self) -> None:
-        """...
-        """
-        pass
+        """Performs the display of the screen for an Client."""
+        while True:
+            self._screen.fill(WHITE)
+            self.draw_grid()
+            self.create_palette()
+            self.set_selection(self._curr_opt)
+
+            visited = set()
+            for node in self.metro_map.get_all_nodes('station'):
+                visited.add(node)
+                pygame.draw.circle(self._screen, BLACK, node.coordinates, 5)
+                for u in node.get_neighbours():
+                    if u not in visited:
+                        pygame.draw.line(self._screen, node.get_color(u), node.coordinates,
+                                         u.coordinates, 3)
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    self.handle_mouse_click(event, (WIDTH, HEIGHT))
+
+            self.hover_display()
+
+            pygame.display.update()
 
     def hover_display(self) -> None:
-        """...
-        """
+        """Gains the current nodes which can be displayed through
+        the self.active_nodes attribute. Provides information on both name and zone."""
+        for node in self.metro_map.get_all_nodes('station'):
+            if in_circle(5, node.coordinates, pygame.mouse.get_pos()):
+                show = node.name + ' ' + '(' + node.zone + ')'
+                draw_text(self._screen, show, 17,
+                          (node.coordinates[0] + 4, node.coordinates[1] - 15))
         pass
