@@ -288,6 +288,8 @@ class Admin(User):
                     # remove the station and the tracks it is part of
                     for neighbour in station.get_neighbours():
                         station.remove_track(neighbour)
+                        if not neighbour.is_station and neighbour.get_neighbours() == set():
+                            self.active_nodes.remove(neighbour)
                     self.active_nodes.remove(station)
                 else:
                     # replace the corner with a station
