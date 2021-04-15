@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Optional, Any
 
-from Node import _Node
+from Node import Node
 import math
 from dataclasses import dataclass
 
@@ -74,7 +74,7 @@ class Map:
     # Instance Attributes:
     #   - _nodes: A collection of nodes in this Map.
 
-    _nodes: dict[str, _Node]
+    _nodes: dict[str, Node]
 
     def __init__(self) -> None:
         """Initialize an empty transit(metro) map
@@ -82,7 +82,7 @@ class Map:
         """
         self._nodes = {}
 
-    def get_node(self, name: str) -> _Node:
+    def get_node(self, name: str) -> Node:
         """Return corresponding node of input name.
         If no name found, raise ValueError.
         """
@@ -91,7 +91,7 @@ class Map:
         else:
             raise ValueError
 
-    def get_all_nodes(self, kind: str = '') -> set[_Node]:
+    def get_all_nodes(self, kind: str = '') -> set[Node]:
         """Return a set of all nodes in the map.
 
         Preconditions:
@@ -105,7 +105,7 @@ class Map:
         else:
             return {node for node in all_nodes if not node.is_station}
 
-    def add_node(self, node: _Node) -> None:
+    def add_node(self, node: Node) -> None:
         """Add a node to the map.
         """
         self._nodes[node.name] = node

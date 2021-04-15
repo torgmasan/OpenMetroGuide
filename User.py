@@ -2,15 +2,15 @@
 This file contains the hierarchy of class User and its children Admin and Client.
 """
 from typing import Optional
-
 from pygame.colordict import THECOLORS
+
 import pygame
 from canvas_utils import GRID_SIZE, get_click_pos, initialize_screen, approximate_edge_click, \
     WHITE, BLACK, in_circle, WIDTH, HEIGHT, PALETTE_WIDTH, draw_text
 import sys
 
 from Map import Map
-from Node import _Node
+from Node import Node
 
 LINE_COLORS = ['blue', 'red', 'yellow', 'green', 'brown', 'purple', 'orange',
                'pink']
@@ -109,13 +109,13 @@ class Admin(User):
     on the screen, it is converted to a Map object. If the metro map is not connected,
     the Admin is given the option of editing the map again.
     """
-    active_nodes: set[_Node]
+    activeNodes: set[Node]
 
     def __init__(self, input_map: Map = Map()) -> None:
         """Initializes the Instance Attributes of the child class of User.
         """
         super(Admin, self).__init__('blue')
-        self.active_nodes = input_map.get_all_nodes()
+        self.activeNodes = input_map.get_all_nodes()
 
     def display(self) -> None:
         """Performs the display of the screen for an Admin"""
@@ -126,7 +126,7 @@ class Admin(User):
             self.set_selection(self._curr_opt)
 
             visited = set()
-            for node in self.active_nodes:
+            for node in self.activeNodes:
                 visited.add(node)
                 if node.is_station:
                     pygame.draw.circle(self._screen, BLACK, node.coordinates, 5)
@@ -147,24 +147,24 @@ class Admin(User):
 
             pygame.display.update()
 
-    def node_exists(self, coordinates: tuple[float, float]) -> Optional[_Node]:
+    def node_exists(self, coordinates: tuple[float, float]) -> Optional[Node]:
         """Return the node if it exists at given coordinates. Else, return None.
         """
-        for node in self.active_nodes:
+        for node in self.activeNodes:
             if node.coordinates == coordinates:
                 return node
         return None
 
     def is_proper_map(self) -> str:
-        """Return whether the nodes in self.active_nodes form a connected map
+        """Return whether the nodes in self.activeNodes form a connected map
         and there are stations at both ends of the metro line(s).
         """
-        for node_1 in self.active_nodes:
-            for node_2 in self.active_nodes:
+        for node_1 in self.activeNodes:
+            for node_2 in self.activeNodes:
                 if not node_1.check_connected(node_2, set()):
                     return 'MAP IS NOT CONNECTED'
 
-        for node_1 in self.active_nodes:
+        for node_1 in self.activeNodes:
             if not node_1.is_station:
                 neighbours = node_1.get_neighbours()
                 if len(neighbours) > 2:
@@ -173,7 +173,7 @@ class Admin(User):
                 elif len(neighbours) < 2:
                     return 'MAP IS INCOMPLETE'
 
-        for node_1 in self.active_nodes:
+        for node_1 in self.activeNodes:
             if not node_1.is_station:
                 neighbours = list(node_1.get_neighbours())
                 u = neighbours[0].get_closest_station({node_1})
@@ -204,10 +204,10 @@ class Admin(User):
 
     def hover_display(self) -> None:
         """Gains the current nodes which can be displayed through
-        the self.active_nodes attribute. Provides information on both name and zone."""
-        for node in self.active_nodes:
+        the self.activeNodes attribute. Provides information on both name and zone."""
+        for node in self.activeNodes:
             if in_circle(5, node.coordinates, pygame.mouse.get_pos()) and node.is_station:
-                show = node.name + ' ' + '(' + node.zone + ')'
+                show = node.name + ' ' + str(node.coordinates)
                 draw_text(self._screen, show, 17,
                           (node.coordinates[0] + 4, node.coordinates[1] - 15))
 
@@ -230,7 +230,7 @@ class Admin(User):
         A right click is handled by creating a track. If left click is being pressed,
         a station created. Delete an existing track by right clicking on it, and delete
         a corner/station by left clicking on it.
-        handle_mouse_click updates and maintains active_nodes.
+        handle_mouse_click updates and maintains activeNodes.
 
         Preconditions:
             - event.type == pygame.MOUSEBUTTONDOWN
@@ -255,24 +255,24 @@ class Admin(User):
                 # One of the nodes already exists, the other node has to be created and linked to
                 # the pre-existing node
                 if n_1 is None and n_2 is not None:
-                    n_1 = _Node(name=str(line_coordinates[0]), is_station=False,
-                                coordinates=line_coordinates[0], zone='')
-                    self.active_nodes.add(n_1)
+                    n_1 = Node(name=str(line_coordinates[0]), is_station=False,
+                               coordinates=line_coordinates[0], zone='')
+                    self.activeNodes.add(n_1)
                     n_1.add_track(n_2, self._curr_opt)
                 elif n_1 is not None and n_2 is None:
-                    n_2 = _Node(name=str(line_coordinates[1]), is_station=False,
-                                coordinates=line_coordinates[1], zone='')
-                    self.active_nodes.add(n_2)
+                    n_2 = Node(name=str(line_coordinates[1]), is_station=False,
+                               coordinates=line_coordinates[1], zone='')
+                    self.activeNodes.add(n_2)
                     n_1.add_track(n_2, self._curr_opt)
 
                 # Both nodes need to be created and linked to each other
                 elif n_1 is None and n_2 is None:
-                    n_1 = _Node(name=str(line_coordinates[0]), is_station=False,
-                                coordinates=line_coordinates[0], zone='')
-                    n_2 = _Node(name=str(line_coordinates[1]), is_station=False,
-                                coordinates=line_coordinates[1], zone='')
-                    self.active_nodes.add(n_1)
-                    self.active_nodes.add(n_2)
+                    n_1 = Node(name=str(line_coordinates[0]), is_station=False,
+                               coordinates=line_coordinates[0], zone='')
+                    n_2 = Node(name=str(line_coordinates[1]), is_station=False,
+                               coordinates=line_coordinates[1], zone='')
+                    self.activeNodes.add(n_1)
+                    self.activeNodes.add(n_2)
                     n_1.add_track(n_2, self._curr_opt)
 
                 # Both nodes already exist
@@ -288,10 +288,10 @@ class Admin(User):
                     # to any other node, remove the node
 
                     if n_1.get_neighbours() == set() and not n_1.is_station:
-                        self.active_nodes.remove(n_1)
+                        self.activeNodes.remove(n_1)
 
                     if n_2.get_neighbours() == set() and not n_2.is_station:
-                        self.active_nodes.remove(n_2)
+                        self.activeNodes.remove(n_2)
 
             elif event.button == 1:  # Left-click is for the nodes (station or corner)
                 station = self.node_exists(coordinates)
@@ -304,11 +304,11 @@ class Admin(User):
                     for neighbour in station.get_neighbours():
                         station.remove_track(neighbour)
                         if not neighbour.is_station and neighbour.get_neighbours() == set():
-                            self.active_nodes.remove(neighbour)
-                    self.active_nodes.remove(station)
+                            self.activeNodes.remove(neighbour)
+                    self.activeNodes.remove(station)
                 else:
                     # replace the corner with a station
-                    self.active_nodes.remove(station)
+                    self.activeNodes.remove(station)
                     self.get_station_info(coordinates, station)
 
             else:
@@ -341,7 +341,7 @@ class Admin(User):
                            radius - 5, 5)
 
     def get_station_info(self, coordinates: tuple[int, int],
-                         replace: Optional[_Node] = None) -> None:
+                         replace: Optional[Node] = None) -> None:
         """Gets the information from the admin about the station such as the name and zone
          and creates a new station.
 
@@ -368,7 +368,7 @@ class Admin(User):
             for event in pygame.event.get():
 
                 chk_2 = False
-                for node in self.active_nodes:
+                for node in self.activeNodes:
                     if node.name == name:
                         chk_2 = True
 
@@ -408,14 +408,14 @@ class Admin(User):
 
             if not chk:
                 initialize_screen((WIDTH + PALETTE_WIDTH, HEIGHT))
-                station = _Node(name, coordinates, True, zone)
+                station = Node(name, coordinates, True, zone)
 
                 if replace is not None:
                     for neighbour in replace.get_neighbours():
                         station.add_track(neighbour, replace.get_color(neighbour))
                         replace.remove_track(neighbour)
 
-                self.active_nodes.add(station)
+                self.activeNodes.add(station)
                 self.display()
                 break
 
@@ -477,8 +477,8 @@ class Client(User):
     """
 
     metro_map: Map
-    _start: Optional[_Node]
-    _end: Optional[_Node]
+    _start: Optional[Node]
+    _end: Optional[Node]
 
     def __init__(self, input_map: Map) -> None:
         """ Initializes the Instance Attributes of
@@ -535,24 +535,10 @@ class Client(User):
 
                     # Selects the 'From' station creating a small box around it indicating 'From'.
                     if event.button == 1:
-                        from_rect = pygame.Rect(station.coordinates[0] - 2,
-                                                station.coordinates[1] - 2,
-                                                station.coordinates[0] + 9,
-                                                station.coordinates[1] + 10)
-                        pygame.draw.rect(surface=self._screen, color=THECOLORS['red'],
-                                         rect=from_rect)
-
                         self._start = station
 
                     # Selects the 'To' station creating a small box around it indicating 'To'.
                     if event.button == 3:
-                        to_rect = pygame.Rect(station.coordinates[0] - 2,
-                                              station.coordinates[1] - 2,
-                                              station.coordinates[0] + 9,
-                                              station.coordinates[1] + 10)
-                        pygame.draw.rect(surface=self._screen, color=THECOLORS['red'],
-                                         rect=to_rect)
-
                         self._end = station
 
                 continue
@@ -652,9 +638,19 @@ class Client(User):
 
     def hover_display(self) -> None:
         """Gains the current nodes which can be displayed through
-        the self.active_nodes attribute. Provides information on both name and zone."""
+        the self.activeNodes attribute. Provides information on both name and zone."""
         for node in self.metro_map.get_all_nodes('station'):
-            if in_circle(5, node.coordinates, pygame.mouse.get_pos()):
+            if node == self._start and self._start is not None:
+                show = node.name + ' ' + '(' + node.zone + ')' + ' START'
+                draw_text(self._screen, show, 17,
+                          (node.coordinates[0] + 4, node.coordinates[1] - 15), THECOLORS['green'])
+
+            elif node == self._end and self._start is not None:
+                show = node.name + ' ' + '(' + node.zone + ')' + ' END'
+                draw_text(self._screen, show, 17,
+                          (node.coordinates[0] + 4, node.coordinates[1] - 15), THECOLORS['red'])
+
+            elif in_circle(5, node.coordinates, pygame.mouse.get_pos()):
                 show = node.name + ' ' + '(' + node.zone + ')'
                 draw_text(self._screen, show, 17,
                           (node.coordinates[0] + 4, node.coordinates[1] - 15))

@@ -30,13 +30,14 @@ BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 
 
-def draw_text(screen: pygame.Surface, text: str, font: int, pos: tuple[int, int]) -> None:
+def draw_text(screen: pygame.Surface, text: str, font: int, pos: tuple[int, int],
+              color: tuple[int, int, int] = BLACK) -> None:
     """Draw the given text to the pygame screen at the given position.
 
     pos represents the *upper-left corner* of the text.
     """
     font = pygame.font.SysFont('inconsolata', font)
-    text_surface = font.render(text, True, BLACK)
+    text_surface = font.render(text, True,  color)
     width, height = text_surface.get_size()
     screen.blit(text_surface,
                 pygame.Rect(pos, (pos[0] + width, pos[1] + height)))
