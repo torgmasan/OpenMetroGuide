@@ -17,7 +17,22 @@ LINE_COLORS = ['blue', 'red', 'yellow', 'green', 'brown', 'purple', 'orange',
 
 
 class User:
-    """ummm i"m just here for the lols"""
+    """The user class is the class that represents the 2 types of users that can access this
+    application such as the admin who creates a metro transit map and the client who can
+    select the starting station and destination station to create a final shortest or cheapest
+    route displaying it on the map.
+
+    Instance Attributes:
+        - opt_to_center: Dictionary which maps the option as a string to the center
+        (top-left in the case of rectangle) coordinates of that option as a tuple.
+
+    """
+
+    # Private Instance Attributes:
+    #   - screen: The screen being used by pygame.
+    #   - _curr_opt: The current optimization option which can be colors in the case of admin or
+    #               'distance' or 'cost' in the case of client.
+
     _screen: pygame.Surface
     _curr_opt: str
     opt_to_center: dict[str: tuple[int, int]]
@@ -455,6 +470,10 @@ class Client(User):
     and then uses pygame mouse click event objects to determine the Client's
     starting point and final destination, and the variable of optimization the Client
     prefers. Then, the best possible route between the two stations is highlighted.
+
+    Instance Attributes:
+        - metro_map: Refers to the current metro transit map being used by the client to
+        locate the stations and find the optimized path as per requirement.
     """
 
     metro_map: Map
@@ -468,19 +487,36 @@ class Client(User):
 
     def handle_mouse_click(self, event: pygame.event.Event,
                            screen_size: tuple[int, int]) -> None:
-        """ Handles what happens once the client clicks the mouse.
-        Left click = Start Station
+        """ Handle a mouse click event.
 
-        Right click = Destination Station
+        A pygame mouse click event object has two attributes that are important for this method:
+            - event.pos: the (x, y) coordinates of the mouse click
+            - event.button: an int representing which mouse button was clicked.
+                            1: left-click, 3: right-click
+
+        The screen_size is a tuple of (width, height), and should be used together with
+        event.pos to determine which cell is being clicked.
+
+        If the click is within the area of the palette, then check if it is within the option of
+        distance or cost and handle accordingly.
+
+        If the click is within the grid, check if the click is left or right.
+        If it is the left click, this marks the starting station. If the click is a right click
+        this marks the destination station. The right click is only possible if a starting station
+        has already been selected.
+
+        Preconditions:
+            - event.type == pygame.MOUSEBUTTONDOWN
+            - screen_size[0] >= ...
+            - screen_size[1] >= ...
         """
         pygame.init()
         click_coordinates = get_click_pos(event)
-        left_selected = False  # Making a provision that the start station NEEDS to be selected
-        # before the destination station is. (Can be removed if not required)
+        left_selected = False
         start_station = ''
         destination_station = ''
 
-        if click_coordinates[0] > WIDTH:
+        if click_coordinates[0] > WIDTH:  # The click is on the palette
 
             for option in self.opt_to_center:
                 target = self.opt_to_center[option]
@@ -488,12 +524,14 @@ class Client(User):
 
                 if input_rect.collidepoint(click_coordinates):
                     self._curr_opt = option
-        else:
+        else:  # The click is on the map.
 
             for station in self.metro_map.get_all_nodes('station'):
 
+                # Checks whether the click was in the vicinity of a station node
                 if in_circle(5, station.coordinates, click_coordinates):
 
+                    # Selects the 'From' station creating a small box around it indicating 'From'.
                     if event.button == 1:
                         left_selected = True
                         from_rect = pygame.Rect(station.coordinates[0] - 2,
@@ -502,11 +540,12 @@ class Client(User):
                                                 station.coordinates[1] + 10)
                         pygame.draw.rect(surface=self._screen, color=(144, 238, 144),
                                          rect=from_rect)
-                        # Enter the color you want
+
                         draw_text(screen=self._screen, text='From', font=4, pos=(
                             station.coordinates[0] - 2, station.coordinates[1] + 8))
                         start_station = station.name
 
+                    # Selects the 'To' station creating a small box around it indicating 'To'.
                     elif event.button == 3 and left_selected:
                         to_rect = pygame.Rect(station.coordinates[0] - 2,
                                               station.coordinates[1] - 2,
@@ -518,7 +557,8 @@ class Client(User):
                             station.coordinates[0] + 2, station.coordinates[1] + 8))
                         destination_station = station.name
 
-                    else:  # Makes a screen stating that destination was selected before start.
+                    # Makes a screen stating that destination was selected before start.
+                    else:
                         chk = True
                         temp_screen = pygame.display.set_mode((50, 10))
                         temp_screen.fill(WHITE)
@@ -542,6 +582,7 @@ class Client(User):
 
                 continue
 
+            # Finds the optimized path as per the requirements of the client.
             if start_station != '':
                 final_route = self.metro_map.optimized_route(start_station,
                                                              destination_station,
@@ -551,8 +592,8 @@ class Client(User):
         return
 
     def _connect_final_route(self, path: list[str]) -> None:
-        """Displays the final path to be displayed
-        highlighting the tracks being used.
+        """Displays the final path highlighting the tracks being used,
+        making the others gray.
         """
 
         for i in range(0, len(path) - 1):
@@ -572,7 +613,9 @@ class Client(User):
         return
 
     def create_palette(self) -> None:
-        """ ...
+        """ Draw the palette which contains the images
+        representing distance and cost for the client
+        to choose as per their requirement.
         """
         rect_width = (PALETTE_WIDTH // 4)
         ht = PALETTE_WIDTH * 6
@@ -590,7 +633,8 @@ class Client(User):
         self.opt_to_center['cost'] = (WIDTH + rect_width, 2 * ht - 50)
 
     def set_selection(self, palette_choice: str) -> None:
-        """Darkens the borders of the selected optimization from the palette provided.
+        """Darkens the borders of the selected
+        optimization from the palette provided.
         """
 
         target = self.opt_to_center[palette_choice]
@@ -599,7 +643,7 @@ class Client(User):
         pygame.draw.rect(self._screen, BLACK, input_rect, 3)
 
     def display(self) -> None:
-        """Performs the display of the screen for an Client."""
+        """Performs the display of the screen for a Client."""
         while True:
             self._screen.fill(WHITE)
             self.draw_grid()
