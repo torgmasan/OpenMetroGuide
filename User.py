@@ -481,13 +481,13 @@ class Client(User):
         destination_station = ''
 
         if click_coordinates[0] > WIDTH:
-            radius = (PALETTE_WIDTH // 2)
 
             for option in self.opt_to_center:
+                target = self.opt_to_center[option]
+                input_rect = pygame.Rect(target[0], target[1], 35, 35)
 
-                if in_circle(radius, self.opt_to_center[option], click_coordinates):
+                if input_rect.collidepoint(click_coordinates):
                     self._curr_opt = option
-                    return
         else:
 
             for station in self.metro_map.get_all_nodes('station'):
@@ -574,30 +574,29 @@ class Client(User):
     def create_palette(self) -> None:
         """ ...
         """
-        radius = (PALETTE_WIDTH // 2)
-        ht = 10 * radius
+        rect_width = (PALETTE_WIDTH // 4)
+        ht = PALETTE_WIDTH * 6
 
-        pygame.draw.circle(self._screen, (175, 238, 238), (WIDTH + radius, ht), radius - 5)
-        draw_text(screen=self._screen, text='Distance', font=20, pos=(WIDTH + radius - 5, ht))
-        self.opt_to_center['distance'] = (WIDTH + radius, ht)
+        image1 = pygame.image.load('distance.png')
+        image_distance = pygame.transform.scale(image1, (30, 30))
 
-        pygame.draw.circle(self._screen, (175, 238, 238), (WIDTH + radius, 2 * ht), radius - 5)
-        draw_text(screen=self._screen, text='Distance', font=20, pos=(WIDTH + radius - 5, ht))
-        self.opt_to_center['cost'] = (WIDTH + radius, 2 * ht)
+        image2 = pygame.image.load('cost.png')
+        image_cost = pygame.transform.scale(image2, (30, 30))
 
-        # The colors are blue for now just to check the positions of the circles and the text.
+        self._screen.blit(image_distance, (WIDTH + rect_width, ht))
+        self.opt_to_center['distance'] = (WIDTH + rect_width, ht)
+
+        self._screen.blit(image_cost, (WIDTH + rect_width, 2 * ht - 50))
+        self.opt_to_center['cost'] = (WIDTH + rect_width, 2 * ht - 50)
 
     def set_selection(self, palette_choice: str) -> None:
         """Darkens the borders of the selected optimization from the palette provided.
-        Also changes self._curr_optimization that represents the selected option to the
-        selected one.
         """
-        radius = (PALETTE_WIDTH // 2)
 
         target = self.opt_to_center[palette_choice]
 
-        pygame.draw.circle(self._screen, BLACK, target,
-                           radius - 5, 5)
+        input_rect = pygame.Rect(target[0] - 2, target[1], 35, 35)
+        pygame.draw.rect(self._screen, BLACK, input_rect, 3)
 
     def display(self) -> None:
         """Performs the display of the screen for an Client."""
@@ -634,4 +633,5 @@ class Client(User):
                 show = node.name + ' ' + '(' + node.zone + ')'
                 draw_text(self._screen, show, 17,
                           (node.coordinates[0] + 4, node.coordinates[1] - 15))
-        pass
+
+        return
