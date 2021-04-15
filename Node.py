@@ -3,7 +3,7 @@ for the OpenMetroGuide graph."""
 from __future__ import annotations
 
 import math
-from typing import Any
+from typing import Any, Optional
 
 
 class _Node:
@@ -43,14 +43,14 @@ class _Node:
         self.zone = zone
 
     def add_track(self, node_2: _Node, color: str) -> None:
-        """Adds track between two nodes"""
+        """Add track between this node and node_2 with color"""
         weight_1 = self.get_distance(node_2)
         weight_2 = self.count_zones(node_2)
         self._neighbouring_nodes[node_2] = weight_1, weight_2, color
         node_2._neighbouring_nodes[self] = weight_1, weight_2, color
 
     def remove_track(self, node_2: _Node) -> None:
-        """Remove track between self and node_2
+        """Remove track between this node and node_2
 
         Preconditions:
             - self.is_adjacent(node_2)
@@ -59,7 +59,7 @@ class _Node:
         node_2._neighbouring_nodes.pop(self)
 
     def is_adjacent(self, node_2: _Node) -> bool:
-        """Return whether self and node_2 are neighbours"""
+        """Return whether this node and node_2 are neighbours"""
         return self in node_2._neighbouring_nodes and node_2 in self._neighbouring_nodes
 
     def check_connected(self, node_2: _Node, visited: set[_Node]) -> bool:
@@ -70,6 +70,7 @@ class _Node:
             - self not in visited
         """
         if self.name == node_2.name:
+            visited.add(self)
             return True
         else:
             visited.add(self)
@@ -79,19 +80,44 @@ class _Node:
                         return True
             return False
 
+    def get_closest_station(self, visited: set[_Node]) -> Optional[_Node]:
+        """Return the closest station to this node
+        WITHOUT using any of the vertices in visited.
+
+        Preconditions:
+            - self not in visited
+        """
+        if self.is_station:
+            return self
+        else:
+            visited.add(self)
+            for u in self._neighbouring_nodes:
+                if u not in visited:
+                    return u.get_closest_station(visited)
+            return None
+
     def get_color(self, node_2: _Node) -> str:
-        """Return the color of the track between self and node_2
+        """Return the color of the track between this node and node_2
 
         Preconditions:
             - self.is_adjacent(node_2)
         """
         return self._neighbouring_nodes[node_2][2]
 
-    def get_neighbours(self) -> set[_Node]:
-        """Gets the neighboring nodes of the station,
-        according to the type of node requested by user.
+    def get_neighbours(self, kind: str = '') -> set[_Node]:
+        """Return the neighboring nodes of this node, according to the kind of
+        node requested by the user.
+
+        Preconditions:
+            - kind in {'', 'station', 'corner'}
         """
-        return set(self._neighbouring_nodes.keys())
+        all_neighbours = set(self._neighbouring_nodes.keys())
+        if kind == '':
+            return all_neighbours
+        elif kind == 'station':
+            return {node for node in all_neighbours if node.is_station}
+        else:
+            return {node for node in all_neighbours if not node.is_station}
 
     def get_weight(self, node2: _Node, optimization: str) -> float:
         """Returns the weight between two nodes. This weight could

@@ -96,7 +96,7 @@ class Admin(User):
     """
     active_nodes: set[_Node]
 
-    def __init__(self, input_map: Map = None) -> None:
+    def __init__(self, input_map: Map = Map()) -> None:
         """Initializes the Instance Attributes of the child class of User.
         """
         super(Admin, self).__init__('blue')
@@ -120,8 +120,7 @@ class Admin(User):
                         pygame.draw.line(self._screen, node.get_color(u), node.coordinates,
                                          u.coordinates, 3)
 
-            if not self.is_proper_map():
-                draw_text(self._screen, 'NOT A PROPER METRO MAP', 17, (347, 10))
+            draw_text(self._screen, self.is_proper_map(), 17, (10, 10))
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -141,17 +140,44 @@ class Admin(User):
                 return node
         return None
 
-    def is_proper_map(self) -> bool:
+    def is_proper_map(self) -> str:
         """Return whether the nodes in self.active_nodes form a connected map
         and there are stations at both ends of the metro line(s).
         """
         for node_1 in self.active_nodes:
-            if not node_1.is_station and len(node_1.get_neighbours()) != 2:
-                return False
             for node_2 in self.active_nodes:
                 if not node_1.check_connected(node_2, set()):
-                    return False
-        return True
+                    return 'MAP IS NOT CONNECTED'
+
+        for node_1 in self.active_nodes:
+            if not node_1.is_station:
+                neighbours = node_1.get_neighbours()
+                if len(neighbours) > 2:
+                    return 'TRACK INTERSECTION CAN ONLY HAPPEN AT STATIONS AND ' \
+                           'TRACK OVERLAP CAN ONLY HAPPEN AT CROSSES OF THE GRID'
+                elif len(neighbours) < 2:
+                    return 'MAP IS INCOMPLETE'
+
+        for node_1 in self.active_nodes:
+            if not node_1.is_station:
+                neighbours = list(node_1.get_neighbours())
+                u = neighbours[0].get_closest_station({node_1})
+                v = neighbours[1].get_closest_station({node_1})
+                if u is None or v is None:
+                    return 'MAP IS INCOMPLETE'
+                visited = {node_1}
+                x = set()
+                while u.check_connected(v, visited):
+                    visited = {n for n in visited if n.is_station}
+                    x = visited - x
+                    if len(x) < 3:
+                        return 'MAP CONTAINS INVALID CYCLIC TRACK'
+                    else:
+                        visited = visited - {u, v}
+                        x = visited
+                        visited.add(node_1)
+
+        return ''
 
     def set_color(self, new_color: str):
         """Set color of track/node created.
@@ -262,6 +288,8 @@ class Admin(User):
                     # remove the station and the tracks it is part of
                     for neighbour in station.get_neighbours():
                         station.remove_track(neighbour)
+                        if not neighbour.is_station and neighbour.get_neighbours() == set():
+                            self.active_nodes.remove(neighbour)
                     self.active_nodes.remove(station)
                 else:
                     # replace the corner with a station
