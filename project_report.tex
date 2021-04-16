@@ -110,7 +110,7 @@
     \subsection*{Admin}
     If the user chose to work as the admin, they will be presented with a screen to either create a new map or select and existing map(if any).The maps existing in the database can be searched through using the left or right arrow key. The options between an existing map and creating a new map can be selected by using the up or down arrow key.\\
     \begin{center}
-        \includegraphics[width = 5cm]{Sample in database}\\
+        \includegraphics[width = 5cm]{Sample in databse.png}\\
     \end{center}
     If there are no pre-existing maps, 'create new map' is auto-selected and the application can proceed by pressing Enter(Return for MacOS).\\
     \begin{center}
@@ -156,8 +156,12 @@
         \includegraphics[width = 5cm]{client shortest route.png} \quad
         \includegraphics[width = 5cm]{client cheapest route.png}
     \end{center}
-    \\
     Both the client and the admin may also hover over the existing stations to find more information about them.
+
+    \section*{Changes to the project}
+    The way we have implemented our project is very similar to what was described in the project proposal itself, implementing client as well as admin portion of the user. We have made a few map making changes where we have let the admin to design their own map providing a few sample maps to cross-check the functioning instead of us making pre-made maps for cities such as Dubai and Toronto.\\
+    \\
+    We also have not yet implemented the resizing of the map window and how that will affect the grids and the map itself. As discussed above, we implemented the TA's suggestion of using Hamiltonian graphs to check whether our map was connected or not.
 
     \section*{Discussion}
     At the start of our project, we had two goals: one was to help our clients visualize the best possible path between two stations, based on their preference for a faster or a cheaper route, and the other was to pioneer an open standard to make real-time maintenance and use of online metro maps world-wide easier. \\
