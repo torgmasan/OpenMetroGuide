@@ -115,7 +115,7 @@ class Admin(User):
     """
     active_nodes: set[Node]
 
-    def __init__(self, city_name: str, input_map: Map = Map()) -> None:
+    def __init__(self, city_name: str, input_map: Map) -> None:
         """Initializes the Instance Attributes of the child class of User.
         """
         super(Admin, self).__init__('blue', city_name)

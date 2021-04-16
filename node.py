@@ -145,9 +145,9 @@ class Node:
         is the price from two nodes in the same zone)."""
         if self.zone == destination_node.zone or self.zone == ''\
                 or destination_node.zone == '':
-            return 1
+            return 0
         else:
-            return 2
+            return 1
 
 
 if __name__ == '__main__':

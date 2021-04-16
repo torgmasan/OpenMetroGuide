@@ -5,6 +5,7 @@ from pygame.colordict import THECOLORS
 
 import user
 from canvas_utils import draw_text, WHITE, BLACK, initialize_screen
+from map import Map
 
 from storage_manager import get_map, init_db, get_cities
 import sys
@@ -59,7 +60,7 @@ def run_home() -> None:
                         current_opt = 0
                 if event.key == pygame.K_RIGHT and screen_type == 1:
                     current_index = (current_index + 1) % len(queue_lst)
-                elif event.key == pygame.K_UP and screen_type == 1:
+                elif event.key == pygame.K_LEFT and screen_type == 1:
                     current_index = (current_index - 1) % len(queue_lst)
                 elif event.key == pygame.K_RETURN:
                     if screen_type == 1 and ((current_user == 'client') or
@@ -81,26 +82,27 @@ def run_home() -> None:
                     else:
                         screen_type += 1
                 else:
-                    if screen_type == 3:
+                    if screen_type == 2:
                         city_name = _handle_event_for_run_home(event, city_name)
 
         if chk and screen_type == 0:
             set_selection(screen, current_user)
 
         name_surface = base_font.render(city_name, True, (0, 0, 0))
-        screen.blit(name_surface, (enter_city_rect.x + 5, enter_city_rect.y + 5))
+        screen.blit(name_surface, (enter_city_rect.x + 5, enter_city_rect.y + 2.5))
 
         draw_text(screen, warning, 15, (160, 190), BLACK)
         pygame.display.flip()
 
+    metro_map = Map()
     if current_opt == 0 and queue_lst:
         city_name = queue_lst[current_index]
+        metro_map = get_map(city_name)
 
     if current_user == 'admin':
-        admin = user.Admin(city_name)
+        admin = user.Admin(city_name, metro_map)
         admin.display()
     else:
-        metro_map = get_map(city_name)
         client = user.Client(metro_map, city_name)
         client.display()
 
@@ -109,11 +111,8 @@ def _handle_event_for_run_home(event: pygame.event.Event, name: str) -> str:
     """Update all the parameters (except rect) using mutation based on the event."""
 
     if event.key == pygame.K_BACKSPACE:
-
         name = name[:-1]
-
     else:
-
         name += event.unicode
 
     return name
