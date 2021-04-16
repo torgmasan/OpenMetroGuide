@@ -26,7 +26,7 @@ def run_home() -> None:
     current_index = 0
     current_opt = 0
     enter_city_rect = pygame.Rect((110, 150, 200, 30))
-    selected = False
+    warning = ''
     city_name = ''
 
     while chk:
@@ -38,11 +38,8 @@ def run_home() -> None:
         elif screen_type == 1:
             refresh_display(screen, screen_type, queue_lst, current_user, current_index, current_opt)
         else:
-            if selected:
-                refresh_display(screen, screen_type, active_color=THECOLORS['blue'],
-                                name_rect=enter_city_rect)
-            else:
-                refresh_display(screen, screen_type, active_color=BLACK, name_rect=enter_city_rect)
+            refresh_display(screen, screen_type, active_color=THECOLORS['blue'],
+                            name_rect=enter_city_rect)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -69,15 +66,17 @@ def run_home() -> None:
                         # Client stops at screen_type 1
                         # Admin who chose to use existing map stops
                         # at type 1
-                        if city_name == '':
-                            # TODO: convert to pygame drawing
-                            print('Enter some name')
                         chk = False
                         break
                     elif screen_type == 2 and current_user == 'admin':
                         # Admin creating new map stops at screen_type 2
-                        chk = False
-                        break
+                        if city_name == '':
+                            warning = 'No input provided'
+                        elif city_name in queue_lst:
+                            warning = 'Name already present'
+                        else:
+                            chk = False
+                            break
                     else:
                         screen_type += 1
                 else:
@@ -86,6 +85,8 @@ def run_home() -> None:
 
         if chk and screen_type == 0:
             set_selection(screen, current_user)
+
+        draw_text(screen, warning, 15, (160, 190), BLACK)
         pygame.display.flip()
 
     if current_opt == 0 and queue_lst:
