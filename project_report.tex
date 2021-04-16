@@ -64,7 +64,21 @@
     Once the map has been created and the user exits the window, the map is automatically saved onto the database. When reloading the application, the name of the cities who's map has been created is displayed and the admin can either choose an existing map to further edit it or create a new map altogether.
 
     \subsection*{Implementing Datasets}
-%All changes made by the map administrator will be stored in a local database.\footnote{OpenMapGuide's true potential would only be realized if it is made into a web application, enabling people to contribute metro maps of their locations and allowing others to benefit from these contributions. The current local implementation will serve as a kernel for this project, that will be worked on in the future.} The storage of data would retain the shape of the metro-map, as well as the properties of the metro-lines and stations.\\
+	The storage of data in the application has the following plan:
+	
+	\begin{enumerate}
+		\item The Admin, after having created the map, automatically saves his creation (or edits if the map was pre-existing).
+		
+		\item The User will be able to access the cities the currently have a plan associated with them, and can choose the city for which the optimization is desired.
+		
+		\item The Admin also has access to previously created maps, should it be required to edit an existing plan.
+	\end{enumerate}
+
+	As seen above, the read/write queries made is quite frequent. Moreover, there are several graphs, of which nodes have several attributes. Thus, it would not be ideal to use a csv file for the storage and retrieval of such data, due to the inefficiency and complexity. Therefore, a lightweight RDBMS alternative was required, and the storage was instead performed with SQLite using the python library \texttt{sqlite3}.
+	
+	 There are two tables. The first table represents the nodes of the metro maps, while the second represents the relations between each node with others. The first table had columns representing the cities, and every other attribute represented the attributes part of the \texttt{Node} object is the maps. This is similarly true for the connections table. This extra cities column was necessary so as to perform queries of adding and deleting information on the same map. This was done by filtering the database on the basis of city name.
+	 
+	 Since each read/write occurred together and was localized for each map,  no minor updates were needed to be taken care of. Hence, there was no usage of a primary and foreign key to link the two tables. However, it should be noted that this implementation is much more efficient, as the task of ensuring uniqueness had to be dealt with by us. 
 
     \subsection*{Implementing the map}
     Just the administrator, the user will have the option to choose from one of the existing maps(they won't be able to create a new map, obviously). The user interface will consist of an interactive map created by the admin. A complete map of the metro will be displayed on the screen (reading from local database) and the user will be able to choose a starting station and a final destination station by selecting the stations on the map. A right click will be used to select the destination station and the left click will will indicate the starting station.The selected station will indicate whether they are the starting station or the destination station when selected.\\
