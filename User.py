@@ -11,6 +11,7 @@ import sys
 
 from Map import Map
 from Node import Node
+from storage_manager import store_map, init_db
 
 LINE_COLORS = ['blue', 'red', 'yellow', 'green', 'brown', 'purple', 'orange',
                'pink']
@@ -109,13 +110,13 @@ class Admin(User):
     on the screen, it is converted to a Map object. If the metro map is not connected,
     the Admin is given the option of editing the map again.
     """
-    activeNodes: set[Node]
+    active_nodes: set[Node]
 
     def __init__(self, input_map: Map = Map()) -> None:
         """Initializes the Instance Attributes of the child class of User.
         """
         super(Admin, self).__init__('blue')
-        self.activeNodes = input_map.get_all_nodes()
+        self.active_nodes = input_map.get_all_nodes()
 
     def display(self) -> None:
         """Performs the display of the screen for an Admin"""
@@ -126,7 +127,7 @@ class Admin(User):
             self.set_selection(self._curr_opt)
 
             visited = set()
-            for node in self.activeNodes:
+            for node in self.active_nodes:
                 visited.add(node)
                 if node.is_station:
                     pygame.draw.circle(self._screen, BLACK, node.coordinates, 5)
@@ -139,6 +140,8 @@ class Admin(User):
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
+                    init_db()
+                    store_map('', self.active_nodes)
                     sys.exit()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     self.handle_mouse_click(event, (WIDTH, HEIGHT))
@@ -150,21 +153,21 @@ class Admin(User):
     def node_exists(self, coordinates: tuple[float, float]) -> Optional[Node]:
         """Return the node if it exists at given coordinates. Else, return None.
         """
-        for node in self.activeNodes:
+        for node in self.active_nodes:
             if node.coordinates == coordinates:
                 return node
         return None
 
     def is_proper_map(self) -> str:
-        """Return whether the nodes in self.activeNodes form a connected map
+        """Return whether the nodes in self.active_nodes form a connected map
         and there are stations at both ends of the metro line(s).
         """
-        for node_1 in self.activeNodes:
-            for node_2 in self.activeNodes:
+        for node_1 in self.active_nodes:
+            for node_2 in self.active_nodes:
                 if not node_1.check_connected(node_2, set()):
                     return 'MAP IS NOT CONNECTED'
 
-        for node_1 in self.activeNodes:
+        for node_1 in self.active_nodes:
             if not node_1.is_station:
                 neighbours = node_1.get_neighbours()
                 if len(neighbours) > 2:
@@ -173,7 +176,7 @@ class Admin(User):
                 elif len(neighbours) < 2:
                     return 'MAP IS INCOMPLETE'
 
-        for node_1 in self.activeNodes:
+        for node_1 in self.active_nodes:
             if not node_1.is_station:
                 neighbours = list(node_1.get_neighbours())
                 u = neighbours[0].get_closest_station({node_1})
@@ -204,8 +207,8 @@ class Admin(User):
 
     def hover_display(self) -> None:
         """Gains the current nodes which can be displayed through
-        the self.activeNodes attribute. Provides information on both name and zone."""
-        for node in self.activeNodes:
+        the self.active_nodes attribute. Provides information on both name and zone."""
+        for node in self.active_nodes:
             if in_circle(5, node.coordinates, pygame.mouse.get_pos()) and node.is_station:
                 show = node.name + ' ' + str(node.coordinates)
                 draw_text(self._screen, show, 17,
@@ -230,7 +233,7 @@ class Admin(User):
         A right click is handled by creating a track. If left click is being pressed,
         a station created. Delete an existing track by right clicking on it, and delete
         a corner/station by left clicking on it.
-        handle_mouse_click updates and maintains activeNodes.
+        handle_mouse_click updates and maintains active_nodes.
 
         Preconditions:
             - event.type == pygame.MOUSEBUTTONDOWN
@@ -257,12 +260,12 @@ class Admin(User):
                 if n_1 is None and n_2 is not None:
                     n_1 = Node(name=str(line_coordinates[0]), is_station=False,
                                coordinates=line_coordinates[0], zone='')
-                    self.activeNodes.add(n_1)
+                    self.active_nodes.add(n_1)
                     n_1.add_track(n_2, self._curr_opt)
                 elif n_1 is not None and n_2 is None:
                     n_2 = Node(name=str(line_coordinates[1]), is_station=False,
                                coordinates=line_coordinates[1], zone='')
-                    self.activeNodes.add(n_2)
+                    self.active_nodes.add(n_2)
                     n_1.add_track(n_2, self._curr_opt)
 
                 # Both nodes need to be created and linked to each other
@@ -271,8 +274,8 @@ class Admin(User):
                                coordinates=line_coordinates[0], zone='')
                     n_2 = Node(name=str(line_coordinates[1]), is_station=False,
                                coordinates=line_coordinates[1], zone='')
-                    self.activeNodes.add(n_1)
-                    self.activeNodes.add(n_2)
+                    self.active_nodes.add(n_1)
+                    self.active_nodes.add(n_2)
                     n_1.add_track(n_2, self._curr_opt)
 
                 # Both nodes already exist
@@ -288,10 +291,10 @@ class Admin(User):
                     # to any other node, remove the node
 
                     if n_1.get_neighbours() == set() and not n_1.is_station:
-                        self.activeNodes.remove(n_1)
+                        self.active_nodes.remove(n_1)
 
                     if n_2.get_neighbours() == set() and not n_2.is_station:
-                        self.activeNodes.remove(n_2)
+                        self.active_nodes.remove(n_2)
 
             elif event.button == 1:  # Left-click is for the nodes (station or corner)
                 station = self.node_exists(coordinates)
@@ -304,11 +307,11 @@ class Admin(User):
                     for neighbour in station.get_neighbours():
                         station.remove_track(neighbour)
                         if not neighbour.is_station and neighbour.get_neighbours() == set():
-                            self.activeNodes.remove(neighbour)
-                    self.activeNodes.remove(station)
+                            self.active_nodes.remove(neighbour)
+                    self.active_nodes.remove(station)
                 else:
                     # replace the corner with a station
-                    self.activeNodes.remove(station)
+                    self.active_nodes.remove(station)
                     self.get_station_info(coordinates, station)
 
             else:
@@ -368,7 +371,7 @@ class Admin(User):
             for event in pygame.event.get():
 
                 chk_2 = False
-                for node in self.activeNodes:
+                for node in self.active_nodes:
                     if node.name == name:
                         chk_2 = True
 
@@ -415,7 +418,7 @@ class Admin(User):
                         station.add_track(neighbour, replace.get_color(neighbour))
                         replace.remove_track(neighbour)
 
-                self.activeNodes.add(station)
+                self.active_nodes.add(station)
                 self.display()
                 break
 
@@ -638,7 +641,7 @@ class Client(User):
 
     def hover_display(self) -> None:
         """Gains the current nodes which can be displayed through
-        the self.activeNodes attribute. Provides information on both name and zone."""
+        the self.active_nodes attribute. Provides information on both name and zone."""
         for node in self.metro_map.get_all_nodes('station'):
             if node == self._start and self._start is not None:
                 show = node.name + ' ' + '(' + node.zone + ')' + ' START'

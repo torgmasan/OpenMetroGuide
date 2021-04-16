@@ -1,10 +1,13 @@
 import pygame
 from pygame.colordict import THECOLORS
+
 import User
 from Node import Node
 from Map import Map
 from canvas_utils import draw_text, WHITE, BLACK, \
     INSTRUCT_CLIENT, INSTRUCT_ADMIN
+
+from storage_manager import get_map, init_db
 import sys
 
 
@@ -53,28 +56,9 @@ def run_home() -> None:
         admin = User.Admin()
         admin.display()
     else:
-        e = Node(name='E', coordinates=(160, 240), is_station=True, zone='1')
-        c = Node(name='C', coordinates=(200, 280), is_station=True, zone='2')
-        b = Node(name='B', coordinates=(120, 280), is_station=True, zone='3')
-        a = Node(name='A', coordinates=(160, 320), is_station=True, zone='4')
-        f = Node(name='F', coordinates=(200, 360), is_station=True, zone='5')
-        # node6 = Node(name='E', coordinates=(200, 320), is_station=True, zone='6')
-
-        e.add_track(node_2=b, color=THECOLORS['blue'])
-        e.add_track(node_2=c, color=THECOLORS['blue'])
-        c.add_track(node_2=a, color=THECOLORS['brown'])
-        b.add_track(node_2=a, color=THECOLORS['green'])
-        a.add_track(node_2=f, color=THECOLORS['green'])
-
-        m = Map()
-        m.add_node(a)
-        m.add_node(b)
-        m.add_node(c)
-        m.add_node(e)
-        m.add_node(f)
-        # m.add_node(node6)
-
-        client = User.Client(m)
+        init_db()
+        metro_map = get_map('')
+        client = User.Client(metro_map)
         client.display()
 
 
