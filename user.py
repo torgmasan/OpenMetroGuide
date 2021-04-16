@@ -165,16 +165,14 @@ class Admin(User):
         """Return whether the nodes in self.active_nodes form a connected map
         and there are stations at both ends of the metro line(s).
         """
-        no_of_stations = 0
+        no_of_stations = len([node_1 for node_1 in self.active_nodes if node_1.is_station])
+        if no_of_stations == 0:
+            return 'MAP IS INCOMPLETE'
+
         for node_1 in self.active_nodes:
-            if node_1.is_station:
-                no_of_stations += 1
             for node_2 in self.active_nodes:
                 if not node_1.check_connected(node_2, set()):
                     return 'MAP IS NOT CONNECTED'
-
-        if no_of_stations == 0:
-            return 'MAP IS INCOMPLETE'
 
         for node_1 in self.active_nodes:
             if not node_1.is_station:
@@ -350,9 +348,16 @@ class Admin(User):
 
         base_font = pygame.font.Font(None, 32)
         pygame.display.set_caption('Station Information')
+
         info = ['', '']
+        # info[0] <=> name, info[1] <=> zone
         info_active = [True, False]
+        # info_active[0] <=> whether name is the active input
+        # info_active[1] <=> whether zone is the active input
         chk = [True, False]
+        # chk[0] <=> whether the input box is still active
+        # chk[1] <=> whether the name is unique or not
+
         while chk[0]:
 
             screen.fill(WHITE)
@@ -409,18 +414,14 @@ def _handle_event_for_station_info(event: pygame.event.Event, info: list[str],
             chk[0] = chk[1] or info[0] == '' or info[1] == ''
 
         elif event.key == pygame.K_BACKSPACE:
-
             if info_active[1]:
                 info[1] = info[1][:-1]
-
             elif info_active[0]:
                 info[0] = info[0][:-1]
 
         else:
-
             if info_active[1]:
                 info[1] += event.unicode
-
             if info_active[0]:
                 info[0] += event.unicode
 
