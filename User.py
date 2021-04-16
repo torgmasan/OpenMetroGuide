@@ -628,7 +628,7 @@ class Client(User):
                 self._connect_final_route(path)
 
             else:
-                for node in self.metro_map.get_all_nodes('station'):
+                for node in self.metro_map.get_all_nodes(''):
                     visited.add(node)
                     for u in node.get_neighbours():
                         if u not in visited:
