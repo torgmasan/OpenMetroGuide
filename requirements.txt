@@ -1,0 +1,7 @@
+# OpenMetroGuide: Python libraries we'll be using in this project.
+
+# Testing and code checking
+python-ta~=1.6.3
+
+# Graphics and data visualization
+pygame~=2.0.1
