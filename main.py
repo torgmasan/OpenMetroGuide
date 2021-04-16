@@ -26,8 +26,8 @@ def run_home() -> None:
     current_index = 0
     current_opt = 0
     enter_city_rect = pygame.Rect((110, 150, 200, 30))
-    selected = False
     city_name = ''
+    base_font = pygame.font.Font(None, 32)
 
     while chk:
 
@@ -38,11 +38,8 @@ def run_home() -> None:
         elif screen_type == 1:
             refresh_display(screen, screen_type, queue_lst, current_user, current_index, current_opt)
         else:
-            if selected:
-                refresh_display(screen, screen_type, active_color=THECOLORS['blue'],
-                                name_rect=enter_city_rect)
-            else:
-                refresh_display(screen, screen_type, active_color=BLACK, name_rect=enter_city_rect)
+            refresh_display(screen, screen_type, active_color=THECOLORS['blue'],
+                            name_rect=enter_city_rect)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -81,11 +78,13 @@ def run_home() -> None:
                     else:
                         screen_type += 1
                 else:
-                    # TODO: event handling for keyboard input
-                    pass
+                    city_name = _handle_event_for_run_home(event, city_name)
 
         if chk and screen_type == 0:
             set_selection(screen, current_user)
+
+        name_surface = base_font.render(city_name, True, (0, 0, 0))
+        screen.blit(name_surface, (enter_city_rect.x + 5, enter_city_rect.y + 5))
         pygame.display.flip()
 
     if current_opt == 0 and queue_lst:
@@ -98,6 +97,20 @@ def run_home() -> None:
         metro_map = get_map(city_name)
         client = user.Client(metro_map, city_name)
         client.display()
+
+
+def _handle_event_for_run_home(event: pygame.event.Event, name: str) -> str:
+    """Update all the parameters (except rect) using mutation based on the event."""
+
+    if event.key == pygame.K_BACKSPACE:
+
+        name = name[:-1]
+
+    else:
+
+        name += event.unicode
+
+    return name
 
 
 def refresh_display(screen: pygame.Surface, screen_type: int, queue_lst: list = None,
