@@ -38,11 +38,13 @@ class User:
     _screen: pygame.Surface
     _curr_opt: str
     opt_to_center: dict[str: tuple[int, int]]
+    city_name: str
 
-    def __init__(self, init_selected: str) -> None:
+    def __init__(self, init_selected: str, city_name: str) -> None:
         self._screen = initialize_screen((WIDTH + PALETTE_WIDTH, HEIGHT))
         self.opt_to_center = {}
         self._curr_opt = init_selected
+        self.city_name = city_name
 
     def draw_grid(self) -> None:
         """Draws a square grid on the given surface.
@@ -113,10 +115,10 @@ class Admin(User):
     """
     active_nodes: set[Node]
 
-    def __init__(self, input_map: Map = Map()) -> None:
+    def __init__(self, city_name: str, input_map: Map = Map()) -> None:
         """Initializes the Instance Attributes of the child class of User.
         """
-        super(Admin, self).__init__('blue')
+        super(Admin, self).__init__('blue', city_name)
         self.active_nodes = input_map.get_all_nodes()
 
     def display(self) -> None:
@@ -142,7 +144,7 @@ class Admin(User):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT and self.is_proper_map() == '':
                     init_db()
-                    store_map('Dubai', self.active_nodes)
+                    store_map(self.city_name, self.active_nodes)
                     sys.exit()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     self.handle_mouse_click(event, (WIDTH, HEIGHT))
@@ -182,25 +184,6 @@ class Admin(User):
                            'TRACK OVERLAP CAN ONLY HAPPEN AT CROSSES OF THE GRID'
                 elif len(neighbours) < 2:
                     return 'MAP IS INCOMPLETE'
-
-        # for node_1 in self.active_nodes:
-        #     if not node_1.is_station:
-        #         neighbours = list(node_1.get_neighbours())
-        #         u = neighbours[0].get_closest_station({node_1})
-        #         v = neighbours[1].get_closest_station({node_1})
-        #         if u is None or v is None:
-        #             return 'MAP IS INCOMPLETE'
-        #         visited = {node_1}
-        #         x = set()
-        #         while u.check_connected(v, visited):
-        #             visited = {n for n in visited if n.is_station}
-        #             x = visited - x
-        #             if len(x) < 3:
-        #                 return 'MAP CONTAINS INVALID CYCLIC TRACK'
-        #             else:
-        #                 visited = visited - {u, v}
-        #                 x = visited
-        #                 visited.add(node_1)
 
         return ''
 
@@ -363,9 +346,7 @@ class Admin(User):
          If replace is not None, then tracks are added between the new station and the
          neighbours of replace.
         """
-        pygame.init()
-        screen = pygame.display.set_mode((700, 200))
-        screen.fill(WHITE)
+        screen = initialize_screen((700, 200))
 
         base_font = pygame.font.Font(None, 32)
         pygame.display.set_caption('Station Information')
@@ -498,11 +479,11 @@ class Client(User):
     _start: Optional[Node]
     _end: Optional[Node]
 
-    def __init__(self, input_map: Map) -> None:
+    def __init__(self, input_map: Map, city_name: str) -> None:
         """ Initializes the Instance Attributes of
         the Client class which is a child of User.
         """
-        super(Client, self).__init__('distance')
+        super(Client, self).__init__('distance', city_name)
         self.metro_map = input_map
         self._start = None
         self._end = None
