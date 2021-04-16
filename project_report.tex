@@ -64,21 +64,21 @@
     Once the map has been created and the user exits the window, the map is automatically saved onto the database. When reloading the application, the name of the cities who's map has been created is displayed and the admin can either choose an existing map to further edit it or create a new map altogether.
 
     \subsection*{Implementing Datasets}
-	The storage of data in the application has the following plan:
-	
-	\begin{enumerate}
-		\item The Admin, after having created the map, automatically saves his creation (or edits if the map was pre-existing).
-		
-		\item The User will be able to access the cities the currently have a plan associated with them, and can choose the city for which the optimization is desired.
-		
-		\item The Admin also has access to previously created maps, should it be required to edit an existing plan.
-	\end{enumerate}
+    The storage of data in the application has the following plan:
 
-	As seen above, the read/write queries made is quite frequent. Moreover, there are several graphs, of which nodes have several attributes. Thus, it would not be ideal to use a csv file for the storage and retrieval of such data, due to the inefficiency and complexity. Therefore, a lightweight RDBMS alternative was required, and the storage was instead performed with SQLite using the python library \texttt{sqlite3}.
-	
-	 There are two tables. The first table represents the nodes of the metro maps, while the second represents the relations between each node with others. The first table had columns representing the cities, and every other attribute represented the attributes part of the \texttt{Node} object is the maps. This is similarly true for the connections table. This extra cities column was necessary so as to perform queries of adding and deleting information on the same map. This was done by filtering the database on the basis of city name.
-	 
-	 Since each read/write occurred together and was localized for each map,  no minor updates were needed to be taken care of. Hence, there was no usage of a primary and foreign key to link the two tables. However, it should be noted that this implementation is much more efficient, as the task of ensuring uniqueness had to be dealt with in \texttt{python} by OpenMetroGuide. 
+    \begin{enumerate}
+        \item The Admin, after having created the map, automatically saves his creation (or edits if the map was pre-existing).
+
+        \item The User will be able to access the cities the currently have a plan associated with them, and can choose the city for which the optimization is desired.
+
+        \item The Admin also has access to previously created maps, should it be required to edit an existing plan.
+    \end{enumerate}
+
+    As seen above, the read/write queries made is quite frequent. Moreover, there are several graphs, of which nodes have several attributes. Thus, it would not be ideal to use a csv file for the storage and retrieval of such data, due to the inefficiency and complexity. Therefore, a lightweight RDBMS alternative was required, and the storage was instead performed with SQLite using the python library \texttt{sqlite3}.
+
+    There are two tables. The first table represents the nodes of the metro maps, while the second represents the relations between each node with others. The first table had columns representing the cities, and every other attribute represented the attributes part of the \texttt{Node} object is the maps. This is similarly true for the connections table. This extra cities column was necessary so as to perform queries of adding and deleting information on the same map. This was done by filtering the database on the basis of city name.
+
+    Since each read/write occurred together and was localized for each map,  no minor updates were needed to be taken care of. Hence, there was no usage of a primary and foreign key to link the two tables. However, it should be noted that this implementation is much more efficient, as the task of ensuring uniqueness had to be dealt with in \texttt{python} by OpenMetroGuide.
 
     \subsection*{Implementing the map}
     Just the administrator, the user will have the option to choose from one of the existing maps(they won't be able to create a new map, obviously). The user interface will consist of an interactive map created by the admin. A complete map of the metro will be displayed on the screen (reading from local database) and the user will be able to choose a starting station and a final destination station by selecting the stations on the map. A right click will be used to select the destination station and the left click will will indicate the starting station.The selected station will indicate whether they are the starting station or the destination station when selected.\\
@@ -99,23 +99,80 @@
     As each of the station from the top of the priority queue is explored, it is removed from the queue when all of its neighbours have been explored. The next station in the queue will then be the one which the lowest total score and the process is repeated. This continues until the destination station is reached and once that is removed from the queue, the iteration stops and we have our optimized path.
     \\
     After the best possible path is calculated as per the user's requirements, this application will display the same transit map as described above highlighting the best possible route and blurring the rest of the map by making the rest of the tracks grey. The route will be color-coordinated based on what metro lines have to be taken. This is done by alternating between the actual color of the track and grey depending on whether the each node in the map is a part of the final map or not.
+
+
     \section*{Instructions for running the application}
-    
-    On lo
+    To run the application, the packages under \texttt{requirements.txt} must be added and \texttt{main.py} needs to be run. The user of the application will be presented with a dialogue box asking whether they wish to run the application as a \texttt{admin}, i.e., administrator or a client. The user may interact with this screen by pressing the up and down arrows and press Enter(Return for MacOS) to go along with one of the options. A new set of pop up screens will appear accordingly based on the choice.\\
+    \begin{center}
+        \includegraphics[width = 5cm]{admin or client.png}\newline
+    \end{center}
+
+    \subsection*{Admin}
+    If the user chose to work as the admin, they will be presented with a screen to either create a new map or select and existing map(if any).The maps existing in the database can be searched through using the left or right arrow key. The options between an existing map and creating a new map can be selected by using the up or down arrow key.\\
+    \begin{center}
+        \includegraphics[width = 5cm]{Sample in database}\\
+    \end{center}
+    If there are no pre-existing maps, 'create new map' is auto-selected and the application can proceed by pressing Enter(Return for MacOS).\\
+    \begin{center}
+        \includegraphics[width = 5cm]{create new map.png}\\
+    \end{center}
+    There can be 2 cases depending on whether a new map is chosen or a pre-existing one.
+    \begin{itemize}
+        \item If the creation of a new map is selected, the admin will be able to add enter the name of the city to be added and stored in the database. This is followed by an empty map screen itself containing grids to make the transit map.
+        \begin{center}
+            \includegraphics[width = 5cm]{enter city name.png} \quad
+            \includegraphics[width = 5cm]{blank map screen.png}
+        \end{center}
+
+        \item The dialogue box to enter the name is not popped up if an existing map is selected. The map containing the grid is directly displayed.
+        \\
+        \begin{center}
+            \includegraphics[width = 5cm]{Sample Map.png}
+        \end{center}
+    \end{itemize}
+    The admin can \textbf{left click to insert a station}. Doing so will pop up another screen asking for the name and zone of the station added. \\
+    \begin{center}
+        \includegraphics[width = 7cm]{enter station info.png}\\
+    \end{center}
+    The admin can also \textbf{create tracks by right clicking} on the screen. They may also change the color of the track by selecting a color from the palette provided on the right hand side. The station can be \textbf{removed by left-clink again} on an existing station. Similarly, a track can be \textbf{removed by right clicking} on an existing track.\\
+    Once the map has been created, the admin may exit the screen by clicking on the cross of the window. This will automatically save the map onto the database.
+
+    \subsection*{Client}
+    If the user chooses to work as the client, they are displayed with a pop up box asking to select one of the pre-existing map they wish to navigate.\\
+    \begin{center}
+        \includegraphics[width = 5cm]{client select city.png}\\
+    \end{center}
+    If there are no such maps, the client is shown with the message 'No map in database' and has to exit out of the window.\\
+    \begin{center}
+        \includegraphics[width = 5cm]{no maps in database.png}\\
+    \end{center}
+    Once a map is chosen, the map loads from the database exactly as made by the admin and is ready for use.\\
+    \begin{center}
+        \includegraphics[width = 5cm]{Sample Map.png}\\
+    \end{center}
+    The client can choose a starting station by \textbf{left clicking} on a station. They can choose a destination station by \textbf{right clicking} on the other station. They can also choose their route of preference whether they want to find the shortest route or the cheapest route(default selected as the shortest) on the palette provided on the right side of the screen.\\
+    As soon as the stations are selected, the optimized path is displayed based on the preference greying out the rest of the tracks.\\
+    \begin{center}
+        \includegraphics[width = 5cm]{client shortest route.png} \quad
+        \includegraphics[width = 5cm]{client cheapest route.png}
+    \end{center}
+    \\
+    Both the client and the admin may also hover over the existing stations to find more information about them.
+
     \section*{Discussion}
     At the start of our project, we had two goals: one was to help our clients visualize the best possible path between two stations, based on their preference for a faster or a cheaper route, and the other was to pioneer an open standard to make real-time maintenance and use of online metro maps world-wide easier. \\
 
-To work towards accomplishing both our goals, we have divided our computational plan into two parts: creating and using the metro map. \\
+    To work towards accomplishing both our goals, we have divided our computational plan into two parts: creating and using the metro map. \\
 
-The 'Client' part of our application effectively calculates the shortest path between two stations (based on a score factor of cost or distance, and taking zone into account as well) using the A* implementation of Dijkstra's algorithm and then highlights the appropriate path on the screen. The client of our application can view previously created metro maps of certain cities, and then use them to figure out the best possible path between any two stations.\\
+    The 'Client' part of our application effectively calculates the shortest path between two stations (based on a score factor of cost or distance, and taking zone into account as well) using the A* implementation of Dijkstra's algorithm and then highlights the appropriate path on the screen. The client of our application can view previously created metro maps of certain cities, and then use them to figure out the best possible path between any two stations.\\
 
-The 'Admin' part of our application is responsible for creating and storing maps. By left-clicking on the grid, we can create new stations, and by right-clicking on the grid, we can create new tracks. Even though the admin does a lot of computations behind the scenes, it is still not sufficiently complex enough for us to be able to fully realize our second goal. Since we only allow inputs in the form of pygame mouse click event objects, it is hard to create metro maps from previously available data, much less maintain them in real time. Moreover, our application only allows tracks in the cardinal and intercardinal directions (north, south, east, west, NE, SE, NW, and SW) and so creating an accurate copy of the actual metro map is difficult. \\
+    The 'Admin' part of our application is responsible for creating and storing maps. By left-clicking on the grid, we can create new stations, and by right-clicking on the grid, we can create new tracks. Even though the admin does a lot of computations behind the scenes, it is still not sufficiently complex enough for us to be able to fully realize our second goal. Since we only allow inputs in the form of pygame mouse click event objects, it is hard to create metro maps from previously available data, much less maintain them in real time. Moreover, our application only allows tracks in the cardinal and intercardinal directions (north, south, east, west, NE, SE, NW, and SW) and so creating an accurate copy of the actual metro map is difficult. Another challenge that we experienced algorithmically was that we could not ensure a minimum constraint of 3 stations in a cycle of the map. This means that there can be two different paths between two adjacent stations, and a track that starts and ends at the same station without visiting any other stations. \\
 
-With  respect to the implementation of storage using a relational database, as mentioned earlier, the current rendition could be improved upon. The projects storage functionality can be made much more versatile and readable if relations between the two tables are implemented in SQL itself. \\
+    With respect to the implementation of storage using a relational database, as mentioned earlier, the current rendition could be improved upon. The projects storage functionality can be made much more versatile and readable if relations between the two tables are implemented in SQL itself. \\
 
-For further exploration, we would like to expand our application to accept inputs in a more geographically accurate form, so as to maximize the effect of our optimization algorithms. Additionally, we would like to allow the admin to rename and delete maps from the database. We would also like to augment attributes onto our current map that keep track of real time changes (like whether a track is under maintenance or a train has been delayed). By converting this into a web application, certified users across the world will be able to create metro maps for their cities, and the general public could use them to make their travel convenient. \\
+    For further exploration, we would like to expand our application to accept inputs in a more geographically accurate form, so as to maximize the effect of our optimization algorithms. Additionally, we would like to allow the admin to rename and delete maps from the database. We would also like to augment attributes onto our current map that keep track of real time changes (like whether a track is under maintenance or a train has been delayed). By converting this into a web application, certified users across the world will be able to create metro maps for their cities, and the general public could use them to make their travel convenient. \\
 
-<name> is currently a humble project with the potential to develop into a global transit application. We hope that over time, as we develop new skills, we will be able to make <name> widely available to people across the world, and with the help of the online community, make it an open standard for use by tourists and residents alike.
+    <name> is currently a humble project with the potential to develop into a global transit application. We hope that over time, as we develop new skills, we will be able to make <name> widely available to people across the world, and with the help of the online community, make it an open standard for use by tourists and residents alike.
     \section*{References}
     \begin{enumerate}
         \item Computerphile. (2017, January 4). Dijkstra's Algorithm - Computerphile. Youtube. https://www.youtube.com/watch?v=GazC3A4OQTE
