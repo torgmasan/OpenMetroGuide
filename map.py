@@ -2,11 +2,11 @@
 """
 from __future__ import annotations
 
-from typing import Optional, Any
+from typing import Optional
 
-from Node import Node
-import math
 from dataclasses import dataclass
+import math
+from node import Node
 
 
 @dataclass
@@ -37,6 +37,8 @@ def get_element(node_queue: list[QueueElement], name: str) -> Optional[QueueElem
     for element in node_queue:
         if element.name == name:
             return element
+
+    return None
 
 
 def update_element(node_queue: list[QueueElement], name: str, new_score_from_start: float,
@@ -170,3 +172,16 @@ class Map:
                 sort_queue(node_queue)
 
         return get_path(curr_element)
+
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
+
+    import python_ta
+    python_ta.check_all(config={
+        'max-line-length': 100,
+        'disable': ['E1136'],
+        'extra-imports': ['node', 'math'],
+        'max-nested-blocks': 4
+    })

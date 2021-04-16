@@ -2,7 +2,7 @@
 """
 import pygame
 
-import User
+import user
 from canvas_utils import draw_text, WHITE, BLACK, \
     INSTRUCT_CLIENT, INSTRUCT_ADMIN
 
@@ -52,12 +52,12 @@ def run_home() -> None:
         pygame.display.flip()
 
     if current == 'admin':
-        admin = User.Admin()
+        admin = user.Admin()
         admin.display()
     else:
         init_db()
         metro_map = get_map('')
-        client = User.Client(metro_map)
+        client = user.Client(metro_map)
         client.display()
 
 

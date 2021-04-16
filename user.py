@@ -2,15 +2,16 @@
 This file contains the hierarchy of class User and its children Admin and Client.
 """
 from typing import Optional
-from pygame.colordict import THECOLORS
+import sys
 
+from pygame.colordict import THECOLORS
 import pygame
 from canvas_utils import GRID_SIZE, get_click_pos, initialize_screen, approximate_edge_click, \
     WHITE, BLACK, in_circle, WIDTH, HEIGHT, PALETTE_WIDTH, draw_text
-import sys
 
-from Map import Map
-from Node import Node
+
+from map import Map
+from node import Node
 from storage_manager import store_map, init_db
 
 LINE_COLORS = ['blue', 'red', 'yellow', 'green', 'brown', 'purple', 'orange',
@@ -197,7 +198,7 @@ class Admin(User):
 
         return ''
 
-    def set_color(self, new_color: str):
+    def set_color(self, new_color: str) -> None:
         """Set color of track/node created.
 
         Preconditions:
@@ -561,14 +562,20 @@ class Client(User):
 
                 if neighbours.name == path[i + 1]:
                     color = node.get_color(neighbours)
-                    pygame.draw.line(surface=self._screen, color=color, start_pos=node.coordinates,
-                                     end_pos=neighbours.coordinates, width=5)
+                    pygame.draw.line(surface=self._screen,
+                                     color=color,
+                                     start_pos=node.coordinates,
+                                     end_pos=neighbours.coordinates,
+                                     width=5)
 
         for node in lst:
 
             for neighbours in node.get_neighbours():
-                pygame.draw.line(surface=self._screen, color=THECOLORS['gray50'],
-                                 start_pos=node.coordinates, end_pos=neighbours.coordinates, width=3)
+                pygame.draw.line(surface=self._screen,
+                                 color=THECOLORS['gray50'],
+                                 start_pos=node.coordinates,
+                                 end_pos=neighbours.coordinates,
+                                 width=3)
 
         return
 
@@ -659,3 +666,17 @@ class Client(User):
                           (node.coordinates[0] + 4, node.coordinates[1] - 15))
 
         return
+
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
+
+    import python_ta
+    python_ta.check_all(config={
+        'max-line-length': 100,
+        'disable': ['E1101', 'E1136', ],
+        'extra-imports': ['map', 'node', 'canvas_utils', 'storage_manager', 'pygame', 'sys',
+                          'pygame.colordict'],
+        'max-nested-blocks': 6
+    })

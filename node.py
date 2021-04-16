@@ -148,3 +148,16 @@ class Node:
             return 1
         else:
             return 2
+
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
+
+    import python_ta
+    python_ta.check_all(config={
+        'max-line-length': 100,
+        'disable': ['E1136'],
+        'extra-imports': ['math'],
+        'max-nested-blocks': 4
+    })

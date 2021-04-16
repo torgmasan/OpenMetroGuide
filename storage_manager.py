@@ -3,8 +3,8 @@ OpenMetroGuide (currently local database). It will handle reading and writing
 to be used by all pygame windows that interact with stored Metro lines.
 """
 import sqlite3
-from Map import Map
-from Node import Node
+from map import Map
+from node import Node
 
 
 def init_db() -> None:
@@ -44,9 +44,10 @@ def store_map(city: str, active_nodes: set) -> None:
         to_update = {element for element in active_rows if nodes_row_similar(curr_rows, element)}
 
         for element in to_add:
-            cursor.execute("""INSERT INTO nodes VALUES (:city, :name, :is_station, :x, :y, 
-            :zone)""", {'city': element[0], 'name': element[1], 'is_station': element[2],
-                        'x': element[3], 'y': element[4], 'zone': element[5]})
+            cursor.execute(
+                """INSERT INTO nodes VALUES (:city, :name, :is_station, :x, :y, :zone)""",
+                {'city': element[0], 'name': element[1], 'is_station': element[2],
+                 'x': element[3], 'y': element[4], 'zone': element[5]})
 
         for element in to_remove:
             cursor.execute("DELETE FROM nodes WHERE city=? AND name=?", (city, element[1]))
@@ -124,3 +125,16 @@ def get_map(city: str) -> Map:
             metro_map.add_track(connection_info[1], connection_info[2], connection_info[3])
 
     return metro_map
+
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()
+
+    import python_ta
+    python_ta.check_all(config={
+        'max-line-length': 100,
+        'disable': ['E9969', 'E9988'],
+        'extra-imports': ['sqlite3', 'map', 'node'],
+        'max-nested-blocks': 4
+    })

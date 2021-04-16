@@ -3,8 +3,8 @@ draw general assets on to the screen, which are present among multiple
 screens and not unique to any one in particular. Also consists of static methods and
 constants regarding pygame rendering."""
 
-import pygame
 import math
+import pygame
 
 WIDTH = 800
 HEIGHT = 800
@@ -37,7 +37,7 @@ def draw_text(screen: pygame.Surface, text: str, font: int, pos: tuple[int, int]
     pos represents the *upper-left corner* of the text.
     """
     font = pygame.font.SysFont('inconsolata', font)
-    text_surface = font.render(text, True,  color)
+    text_surface = font.render(text, True, color)
     width, height = text_surface.get_size()
     screen.blit(text_surface,
                 pygame.Rect(pos, (pos[0] + width, pos[1] + height)))
@@ -119,3 +119,16 @@ def in_circle(radius: int, centre_coordinates: tuple[int, int],
     dist = math.sqrt((x_2 - x_1) ** 2 + (y_2 - y_1) ** 2)
 
     return dist <= radius
+
+
+if __name__ == '__main__':
+
+    import doctest
+    doctest.testmod()
+
+    import python_ta
+    python_ta.check_all(config={
+        'max-line-length': 100,
+        'extra-imports': ['pygame', 'math'],
+        'max-nested-blocks': 4
+    })
