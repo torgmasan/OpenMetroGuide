@@ -26,6 +26,7 @@ def run_home() -> None:
     current_index = 0
     current_opt = 0
     enter_city_rect = pygame.Rect((110, 150, 200, 30))
+    warning = ''
     city_name = ''
     base_font = pygame.font.Font(None, 32)
 
@@ -66,25 +67,30 @@ def run_home() -> None:
                         # Client stops at screen_type 1
                         # Admin who chose to use existing map stops
                         # at type 1
-                        if city_name == '':
-                            # TODO: convert to pygame drawing
-                            print('Enter some name')
                         chk = False
                         break
                     elif screen_type == 2 and current_user == 'admin':
                         # Admin creating new map stops at screen_type 2
-                        chk = False
-                        break
+                        if city_name == '':
+                            warning = 'No input provided'
+                        elif city_name in queue_lst:
+                            warning = 'Name already present'
+                        else:
+                            chk = False
+                            break
                     else:
                         screen_type += 1
                 else:
-                    city_name = _handle_event_for_run_home(event, city_name)
+                    if screen_type == 3:
+                        city_name = _handle_event_for_run_home(event, city_name)
 
         if chk and screen_type == 0:
             set_selection(screen, current_user)
 
         name_surface = base_font.render(city_name, True, (0, 0, 0))
         screen.blit(name_surface, (enter_city_rect.x + 5, enter_city_rect.y + 5))
+
+        draw_text(screen, warning, 15, (160, 190), BLACK)
         pygame.display.flip()
 
     if current_opt == 0 and queue_lst:
