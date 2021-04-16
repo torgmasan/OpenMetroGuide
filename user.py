@@ -140,7 +140,7 @@ class Admin(User):
             draw_text(self._screen, self.is_proper_map(), 17, (10, 10))
 
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
+                if event.type == pygame.QUIT and self.is_proper_map() == '':
                     init_db()
                     store_map('', self.active_nodes)
                     sys.exit()
@@ -163,10 +163,16 @@ class Admin(User):
         """Return whether the nodes in self.active_nodes form a connected map
         and there are stations at both ends of the metro line(s).
         """
+        no_of_stations = 0
         for node_1 in self.active_nodes:
+            if node_1.is_station:
+                no_of_stations += 1
             for node_2 in self.active_nodes:
                 if not node_1.check_connected(node_2, set()):
                     return 'MAP IS NOT CONNECTED'
+
+        if no_of_stations == 0:
+            return 'MAP IS INCOMPLETE'
 
         for node_1 in self.active_nodes:
             if not node_1.is_station:
@@ -177,24 +183,24 @@ class Admin(User):
                 elif len(neighbours) < 2:
                     return 'MAP IS INCOMPLETE'
 
-        for node_1 in self.active_nodes:
-            if not node_1.is_station:
-                neighbours = list(node_1.get_neighbours())
-                u = neighbours[0].get_closest_station({node_1})
-                v = neighbours[1].get_closest_station({node_1})
-                if u is None or v is None:
-                    return 'MAP IS INCOMPLETE'
-                visited = {node_1}
-                x = set()
-                while u.check_connected(v, visited):
-                    visited = {n for n in visited if n.is_station}
-                    x = visited - x
-                    if len(x) < 3:
-                        return 'MAP CONTAINS INVALID CYCLIC TRACK'
-                    else:
-                        visited = visited - {u, v}
-                        x = visited
-                        visited.add(node_1)
+        # for node_1 in self.active_nodes:
+        #     if not node_1.is_station:
+        #         neighbours = list(node_1.get_neighbours())
+        #         u = neighbours[0].get_closest_station({node_1})
+        #         v = neighbours[1].get_closest_station({node_1})
+        #         if u is None or v is None:
+        #             return 'MAP IS INCOMPLETE'
+        #         visited = {node_1}
+        #         x = set()
+        #         while u.check_connected(v, visited):
+        #             visited = {n for n in visited if n.is_station}
+        #             x = visited - x
+        #             if len(x) < 3:
+        #                 return 'MAP CONTAINS INVALID CYCLIC TRACK'
+        #             else:
+        #                 visited = visited - {u, v}
+        #                 x = visited
+        #                 visited.add(node_1)
 
         return ''
 
@@ -241,82 +247,87 @@ class Admin(User):
             - screen_size[0] >= ...
             - screen_size[1] >= ...
         """
-        coordinates = get_click_pos(event)
-
         if event.pos[0] > WIDTH:  # The click is on the color palette
             radius = (PALETTE_WIDTH // 2)
-
+            coordinates = get_click_pos(event)
             for option in self.opt_to_center:
                 if in_circle(radius, self.opt_to_center[option], coordinates):
                     self.set_color(option)
                     return
+
         else:  # The click is on the map
             if event.button == 3:  # Right-click is for track
-                line_coordinates = approximate_edge_click(event)
-                n_1 = self.node_exists(line_coordinates[0])
-                n_2 = self.node_exists(line_coordinates[1])
-
-                # One of the nodes already exists, the other node has to be created and linked to
-                # the pre-existing node
-                if n_1 is None and n_2 is not None:
-                    n_1 = Node(name=str(line_coordinates[0]), is_station=False,
-                               coordinates=line_coordinates[0], zone='')
-                    self.active_nodes.add(n_1)
-                    n_1.add_track(n_2, self._curr_opt)
-                elif n_1 is not None and n_2 is None:
-                    n_2 = Node(name=str(line_coordinates[1]), is_station=False,
-                               coordinates=line_coordinates[1], zone='')
-                    self.active_nodes.add(n_2)
-                    n_1.add_track(n_2, self._curr_opt)
-
-                # Both nodes need to be created and linked to each other
-                elif n_1 is None and n_2 is None:
-                    n_1 = Node(name=str(line_coordinates[0]), is_station=False,
-                               coordinates=line_coordinates[0], zone='')
-                    n_2 = Node(name=str(line_coordinates[1]), is_station=False,
-                               coordinates=line_coordinates[1], zone='')
-                    self.active_nodes.add(n_1)
-                    self.active_nodes.add(n_2)
-                    n_1.add_track(n_2, self._curr_opt)
-
-                # Both nodes already exist
-                elif n_1 is not None and n_2 is not None:
-                    if n_1.is_adjacent(n_2):
-                        # if they already have a track between them, remove the track
-                        n_1.remove_track(n_2)
-                    else:
-                        # else, add a track between them
-                        n_1.add_track(n_2, self._curr_opt)
-
-                    # if either or both of the nodes is a corner and is not connected
-                    # to any other node, remove the node
-
-                    if n_1.get_neighbours() == set() and not n_1.is_station:
-                        self.active_nodes.remove(n_1)
-
-                    if n_2.get_neighbours() == set() and not n_2.is_station:
-                        self.active_nodes.remove(n_2)
-
+                self._handle_right_click(event)
             elif event.button == 1:  # Left-click is for the nodes (station or corner)
-                station = self.node_exists(coordinates)
-
-                if station is None:
-                    # create new station
-                    self.get_station_info(coordinates)
-                elif station.is_station:
-                    # remove the station and the tracks it is part of
-                    for neighbour in station.get_neighbours():
-                        station.remove_track(neighbour)
-                        if not neighbour.is_station and neighbour.get_neighbours() == set():
-                            self.active_nodes.remove(neighbour)
-                    self.active_nodes.remove(station)
-                else:
-                    # replace the corner with a station
-                    self.active_nodes.remove(station)
-                    self.get_station_info(coordinates, station)
-
+                self._handle_left_click(event)
             else:
                 return
+
+    def _handle_right_click(self, event: pygame.event.Event) -> None:
+        """Helper method for handle_mouse_click"""
+        line_coordinates = approximate_edge_click(event)
+        n_1 = self.node_exists(line_coordinates[0])
+        n_2 = self.node_exists(line_coordinates[1])
+
+        # One of the nodes already exists, the other node has to be created and linked to
+        # the pre-existing node
+        if n_1 is None and n_2 is not None:
+            n_1 = Node(name=str(line_coordinates[0]), is_station=False,
+                       coordinates=line_coordinates[0], zone='')
+            self.active_nodes.add(n_1)
+            n_1.add_track(n_2, self._curr_opt)
+        elif n_1 is not None and n_2 is None:
+            n_2 = Node(name=str(line_coordinates[1]), is_station=False,
+                       coordinates=line_coordinates[1], zone='')
+            self.active_nodes.add(n_2)
+            n_1.add_track(n_2, self._curr_opt)
+
+        # Both nodes need to be created and linked to each other
+        elif n_1 is None and n_2 is None:
+            n_1 = Node(name=str(line_coordinates[0]), is_station=False,
+                       coordinates=line_coordinates[0], zone='')
+            n_2 = Node(name=str(line_coordinates[1]), is_station=False,
+                       coordinates=line_coordinates[1], zone='')
+            self.active_nodes.add(n_1)
+            self.active_nodes.add(n_2)
+            n_1.add_track(n_2, self._curr_opt)
+
+        # Both nodes already exist
+        elif n_1 is not None and n_2 is not None:
+            if n_1.is_adjacent(n_2):
+                # if they already have a track between them, remove the track
+                n_1.remove_track(n_2)
+            else:
+                # else, add a track between them
+                n_1.add_track(n_2, self._curr_opt)
+
+            # if either or both of the nodes is a corner and is not connected
+            # to any other node, remove the node
+            if n_1.get_neighbours() == set() and not n_1.is_station:
+                self.active_nodes.remove(n_1)
+
+            if n_2.get_neighbours() == set() and not n_2.is_station:
+                self.active_nodes.remove(n_2)
+
+    def _handle_left_click(self, event: pygame.event.Event) -> None:
+        """Helper method for handle_mouse_click"""
+        coordinates = get_click_pos(event)
+        station = self.node_exists(coordinates)
+
+        if station is None:
+            # create new station
+            self.get_station_info(coordinates)
+        elif station.is_station:
+            # remove the station and the tracks it is part of
+            for neighbour in station.get_neighbours():
+                station.remove_track(neighbour)
+                if not neighbour.is_station and neighbour.get_neighbours() == set():
+                    self.active_nodes.remove(neighbour)
+            self.active_nodes.remove(station)
+        else:
+            # replace the corner with a station
+            self.active_nodes.remove(station)
+            self.get_station_info(coordinates, station)
 
     def create_palette(self) -> None:
         """Draw the palette of colors available to the user to choose
@@ -358,61 +369,29 @@ class Admin(User):
 
         base_font = pygame.font.Font(None, 32)
         pygame.display.set_caption('Station Information')
-        name = ''
-        zone = ''
-        name_active = False
-        zone_active = False
-        chk = True
-        chk_2 = False
-        while chk:
+        info = ['', '']
+        info_active = [True, False]
+        chk = [True, False]
+        while chk[0]:
 
             screen.fill(WHITE)
-            name_rect, zone_rect = _refresh_input_display(screen, name_active, zone_active, chk_2)
+            rect = _refresh_input_display(screen, info_active[0], info_active[1], chk[1])
 
             for event in pygame.event.get():
 
-                chk_2 = False
+                chk[1] = False
                 for node in self.active_nodes:
-                    if node.name == name:
-                        chk_2 = True
+                    if node.name == info[0]:
+                        chk[1] = True
 
-                if event.type == pygame.QUIT:
-                    sys.exit()
+                _handle_event_for_station_info(event, info, info_active, chk, rect)
+                if not chk[0]:
+                    break
 
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if name_rect.collidepoint(event.pos):
-                        name_active = True
-                        zone_active = False
-
-                    if zone_rect.collidepoint(event.pos):
-                        zone_active = True
-                        name_active = False
-
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_RETURN:
-                        chk = chk_2 or name == '' or zone == ''
-                        if not chk:
-                            break
-
-                    elif event.key == pygame.K_BACKSPACE:
-
-                        if zone_active:
-                            zone = zone[:-1]
-
-                        elif name_active:
-                            name = name[:-1]
-
-                    else:
-
-                        if zone_active:
-                            zone += event.unicode
-
-                        if name_active:
-                            name += event.unicode
-
-            if not chk:
+            if not chk[0]:
                 initialize_screen((WIDTH + PALETTE_WIDTH, HEIGHT))
-                station = Node(name, coordinates, True, zone)
+                station = Node(name=info[0], coordinates=coordinates,
+                               is_station=True, zone=info[1])
 
                 if replace is not None:
                     for neighbour in replace.get_neighbours():
@@ -423,11 +402,46 @@ class Admin(User):
                 self.display()
                 break
 
-            name_surface = base_font.render(name, True, (0, 0, 0))
-            zone_surface = base_font.render(zone, True, (0, 0, 0))
-            screen.blit(name_surface, (name_rect.x + 5, name_rect.y + 2.5))
-            screen.blit(zone_surface, (zone_rect.x + 5, zone_rect.y + 2.5))
+            name_surface = base_font.render(info[0], True, (0, 0, 0))
+            zone_surface = base_font.render(info[1], True, (0, 0, 0))
+            screen.blit(name_surface, (rect[0].x + 5, rect[0].y + 2.5))
+            screen.blit(zone_surface, (rect[1].x + 5, rect[1].y + 2.5))
             pygame.display.flip()
+
+
+def _handle_event_for_station_info(event: pygame.event.Event, info: list[str],
+                                   info_active: list[bool], chk: list[bool],
+                                   rect: tuple[pygame.Rect, pygame.Rect]) -> None:
+    """Update all the parameters (except rect) using mutation based on the event."""
+    if event.type == pygame.QUIT:
+        sys.exit()
+
+    elif event.type == pygame.MOUSEBUTTONDOWN:
+        if rect[0].collidepoint(event.pos):
+            info_active[0], info_active[1] = True, False
+
+        if rect[1].collidepoint(event.pos):
+            info_active[0], info_active[1] = False, True
+
+    elif event.type == pygame.KEYDOWN:
+        if event.key == pygame.K_RETURN:
+            chk[0] = chk[1] or info[0] == '' or info[1] == ''
+
+        elif event.key == pygame.K_BACKSPACE:
+
+            if info_active[1]:
+                info[1] = info[1][:-1]
+
+            elif info_active[0]:
+                info[0] = info[0][:-1]
+
+        else:
+
+            if info_active[1]:
+                info[1] += event.unicode
+
+            if info_active[0]:
+                info[0] += event.unicode
 
 
 def _refresh_input_display(screen: pygame.Surface,
