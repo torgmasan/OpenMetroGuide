@@ -183,6 +183,25 @@ class Admin(User):
                 elif len(neighbours) < 2:
                     return 'MAP IS INCOMPLETE'
 
+        # for node_1 in self.active_nodes:
+        #     if not node_1.is_station:
+        #         neighbours = list(node_1.get_neighbours())
+        #         u = neighbours[0].get_closest_station({node_1})
+        #         v = neighbours[1].get_closest_station({node_1})
+        #         if u is None or v is None:
+        #             return 'MAP IS INCOMPLETE'
+        #         visited = {node_1}
+        #         x = set()
+        #         while u.check_connected(v, visited):
+        #             visited = {n for n in visited if n.is_station}
+        #             x = visited - x
+        #             if len(x) < 3:
+        #                 return 'MAP CONTAINS INVALID CYCLIC TRACK'
+        #             else:
+        #                 visited = visited - {u, v}
+        #                 x = visited
+        #                 visited.add(node_1)
+
         return ''
 
     def set_color(self, new_color: str) -> None:
@@ -673,5 +692,5 @@ if __name__ == '__main__':
         'disable': ['E1101', 'E1136', ],
         'extra-imports': ['map', 'node', 'canvas_utils', 'storage_manager', 'pygame', 'sys',
                           'pygame.colordict'],
-        'max-nested-blocks': 6
+        'max-nested-blocks': 5
     })
