@@ -127,6 +127,21 @@ def get_map(city: str) -> Map:
     return metro_map
 
 
+def get_cities() -> list[str]:
+    """Get all the possible city options in the current local database"""
+    conn = sqlite3.connect('map_storage.db')
+    cursor = conn.cursor()
+    ret_set = set()
+
+    with conn:
+        cursor.execute("SELECT city FROM nodes")
+
+        for element in cursor.fetchall():
+            ret_set.add(element[0])
+
+    return list(ret_set)
+
+
 if __name__ == '__main__':
     import doctest
     doctest.testmod()

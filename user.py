@@ -142,7 +142,7 @@ class Admin(User):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT and self.is_proper_map() == '':
                     init_db()
-                    store_map('', self.active_nodes)
+                    store_map('Dubai', self.active_nodes)
                     sys.exit()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     self.handle_mouse_click(event, (WIDTH, HEIGHT))
