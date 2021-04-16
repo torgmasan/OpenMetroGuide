@@ -248,3 +248,14 @@ def set_selection(screen: pygame.Surface, selected: str):
 
 if __name__ == "__main__":
     run_home()
+
+    import doctest
+    doctest.testmod()
+
+    import python_ta
+    python_ta.check_all(config={
+        'max-line-length': 100,
+        'disable': ['E1136'],
+        'extra-imports': ['node', 'math'],
+        'max-nested-blocks': 4
+    })
