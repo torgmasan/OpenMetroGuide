@@ -15,17 +15,6 @@ PALETTE_WIDTH = 50
 BOX_WIDTH = WIDTH // GRID_SIZE
 BOX_HEIGHT = HEIGHT // GRID_SIZE
 
-
-INSTRUCT_ADMIN = ["Left click on a point in the grid to add a Metro Station or a",
-                  "Node to the Map. Additional Left click deletes Node/Station.",
-                  "Right Click on a side or diagonal to add a track line that",
-                  " connects two Nodes/Stations. Additional Right click deletes ",
-                  "track. Click on a Palette to select color.",
-                  "",
-                  "                      PRESS ENTER TO CONTINUE."]
-
-INSTRUCT_CLIENT = ""
-
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
 
