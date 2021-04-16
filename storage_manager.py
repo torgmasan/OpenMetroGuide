@@ -39,33 +39,30 @@ def store_map(city: str, active_nodes: set) -> None:
         cursor.execute("SELECT * FROM nodes WHERE city=?", (city,))
         curr_rows = set(cursor.fetchall())
         to_add = {element for element in active_rows if not nodes_row_similar(curr_rows, element)}
-        to_remove = {element for element in curr_rows if not nodes_row_similar(active_rows, element)}
+        to_remove = {element for element in curr_rows if
+                     not nodes_row_similar(active_rows, element)}
         to_update = {element for element in active_rows if nodes_row_similar(curr_rows, element)}
 
         for element in to_add:
-            cursor.execute("""INSERT INTO nodes VALUES (:city, :name, :is_station, :x, :y, :zone)""",
-                           {'city': element[0], 'name': element[1], 'is_station': element[2], 'x': element[3],
-                            'y': element[4], 'zone': element[5]})
+            cursor.execute("""INSERT INTO nodes VALUES (:city, :name, :is_station, :x, :y, 
+            :zone)""", {'city': element[0], 'name': element[1], 'is_station': element[2],
+                        'x': element[3], 'y': element[4], 'zone': element[5]})
 
         for element in to_remove:
             cursor.execute("DELETE FROM nodes WHERE city=? AND name=?", (city, element[1]))
 
         for element in to_update:
-            cursor.execute("""UPDATE nodes SET is_station=?, x=?, y=?, zone=? WHERE city=? AND name=?""",
-                           (element[2], element[3], element[4], element[5], city, element[1]))
+            cursor.execute(
+                """UPDATE nodes SET is_station=?, x=?, y=?, zone=? WHERE city=? AND name=?""",
+                (element[2], element[3], element[4], element[5], city, element[1]))
 
         cursor.execute("DELETE FROM connections WHERE city=?", (city,))
         active_connections = create_connection_stations(city, active_nodes)
 
         for element in active_connections:
             cursor.execute("""INSERT INTO connections VALUES (:city, :name_1, :name_2, :colors)""",
-                           {'city': element[0], 'name_1': element[1], 'name_2': element[2], 'colors': element[3]})
-
-        cursor.execute("""SELECT * FROM nodes""")
-        print(cursor.fetchall())
-
-        cursor.execute("""SELECT * FROM connections""")
-        print(cursor.fetchall())
+                           {'city': element[0], 'name_1': element[1], 'name_2': element[2],
+                            'colors': element[3]})
 
 
 def nodes_row_similar(all_rows: set[tuple[str, str, str, int, int, int]],
@@ -78,7 +75,8 @@ def nodes_row_similar(all_rows: set[tuple[str, str, str, int, int, int]],
     return False
 
 
-def create_rows_stations(city: str, active_nodes: set[Node]) -> set[tuple[str, str, str, int, int, int]]:
+def create_rows_stations(city: str, active_nodes: set[Node]) -> \
+        set[tuple[str, str, str, int, int, int]]:
     """Creates row entries of stations table from the active nodes provided"""
     row_set = set()
     for node in active_nodes:
@@ -88,7 +86,8 @@ def create_rows_stations(city: str, active_nodes: set[Node]) -> set[tuple[str, s
     return row_set
 
 
-def create_connection_stations(city: str, active_nodes: set[Node]) -> set[tuple[str, str, str, str]]:
+def create_connection_stations(city: str, active_nodes: set[Node]) -> \
+        set[tuple[str, str, str, str]]:
     """Creates row entries of connections from the active nodes provided"""
     row_set = set()
     for node in active_nodes:
@@ -125,4 +124,3 @@ def get_map(city: str) -> Map:
             metro_map.add_track(connection_info[1], connection_info[2], connection_info[3])
 
     return metro_map
-

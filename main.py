@@ -1,9 +1,8 @@
+"""Runs the home application window.
+"""
 import pygame
-from pygame.colordict import THECOLORS
 
 import User
-from Node import Node
-from Map import Map
 from canvas_utils import draw_text, WHITE, BLACK, \
     INSTRUCT_CLIENT, INSTRUCT_ADMIN
 
