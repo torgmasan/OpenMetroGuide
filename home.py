@@ -10,6 +10,7 @@ from map import Map
 
 from storage_manager import get_map, init_db, get_cities
 
+init_db()
 screen_type = 0
 screen = initialize_screen((400, 300))
 queue_lst = get_cities()
@@ -24,7 +25,6 @@ def run_home() -> None:
     to the OpenMetroGuide application.
     """
     global is_admin, is_existing, current_index, screen_type
-    init_db()
 
     pygame.display.set_caption("OpenMetroGuide")
     chk = True
