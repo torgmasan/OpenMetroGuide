@@ -486,6 +486,10 @@ class Client(User):
         """
         super(Client, self).__init__('distance', city_name)
         self.metro_map = input_map
+        for node in self.metro_map.get_all_nodes():
+            for neighbor in node.get_neighbours():
+                node.update_weights(neighbor)
+
         self._start = None
         self._end = None
 

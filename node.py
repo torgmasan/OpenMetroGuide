@@ -45,9 +45,14 @@ class Node:
     def add_track(self, node_2: Node, color: str) -> None:
         """Add track between this node and node_2 with color"""
         weight_1 = self.get_distance(node_2)
-        weight_2 = self.count_zones(node_2)
-        self._neighbouring_nodes[node_2] = weight_1, weight_2, color
-        node_2._neighbouring_nodes[self] = weight_1, weight_2, color
+        self._neighbouring_nodes[node_2] = weight_1, 0, color
+        node_2._neighbouring_nodes[self] = weight_1, 0, color
+
+    def update_weights(self, node_2: Node) -> None:
+        """Since count_zones needs all nodes to be added, this function
+        serves as the updating of the weight of each track from a cost perspective"""
+        temp = self._neighbouring_nodes[node_2]
+        self._neighbouring_nodes[node_2] = temp[0], self.count_zones(node_2), temp[2]
 
     def remove_track(self, node_2: Node) -> None:
         """Remove track between this node and node_2
