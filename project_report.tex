@@ -3,7 +3,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[margin=0.75in]{geometry}
 \usepackage{graphicx}
-\title{CSC111 Project Proposal: OpenMetroGuide}
+\title{CSC111 Project Proposal: Optimized Metro Guide}
 \author{Ansh Jain, Nikhil Sreekumar, Sidharth Sachdev}
 \date{Tuesday, March 16, 2021}
 
@@ -22,23 +22,23 @@
 
     \textbf{Goal 1: Our project helps its users visualize the best possible path between two stations, based on their preference for a faster or a cheaper route}.\newline
 
-    While navigating the map as mentioned above is a complex task, making sure that the metro map is up-to-date and notifies users of real-time situations is a problem as well. The secondary objective of our project is to enable map administrators to make frequent changes for the maintenance of these metro maps. We do so by providing a set of the most common utilities that would be required by maintainers irrespective of the city that they are concerned with. It is clear that there are certain aspects of updating map in real-time (Train delays, stations under maintenance etc.) that are issues all metros would have to deal with. OpenMetroGuide creates an open standard based on how the metro stations are maintained and read.\newline
+    Metro map creation is not a one time process. There are changes that occur over the years, especially in newer cities, where new stations and lines are added, while others are removed. The secondary objective of our project is to enable map administrators to make frequent changes for the maintenance of these metro maps. Optimized Metro Guide creates an open standard based on how the metro stations are edited and read.\newline
 
 
     \textbf{Goal 2:
     Our project can be a pioneer in using this open standard to make real-time maintenance and use of online metro maps world-wide easier.
     }\newline
 
-    \subsubsection{TA's suggestion}
-    As per the TA's suggestion to change the title of the project to be a bit more specific, we renamed it to $\dots$\\
-    \textbf{TODO: ADD NEW NAME.}\\
+    \subsubsection*{TA's suggestion}
+    As per the TA's suggestion to change the title of the project to be a bit more specific, we renamed it to
+    \textbf{Optimized Metro Guide}\\
     We also used the suggestion to implement Hamiltonian graphs in order to check whether the map is connected at all times. If not, then the application displays a message indicating that the map isn't connected.
     \section*{Data-sets Description}
-    There are no prior datasets that need to be downloaded or are present in the program. Instead, the user is responsible for reading or writing into the local database depending on the users privileges (Admin or User). There are through instructions that guide the user before viewing/editing of the maps can begin. This includes error messages if the local database is empty. Using these navigation steps at the start and the creation of metro maps following the steps, the local database will be populated.
+    There are no prior datasets that need to be downloaded or are present in the program. Instead, the user is responsible for reading or writing into the local database depending on the users privileges (Admin or Client). There are thorough instructions that guide the user before viewing/editing of the maps can begin. This includes error messages if the local database is empty. Using these navigation steps at the start and the creation of metro maps following the steps, the local database will be populated.
 
     \section*{Computational Plan}
-%This application can be accessed by two types of users. One is the map administrator/maintainer and the other is the client using the application for travel information.
-    Our project represents the metro transit map of a city/region as a graph and utilize it by displaying the best possible shortest or cheapest route. It can be used by 2 types of users, the administrator and the client. The administrator has the ability to modify the map and save the result into a database. The client utilizes the map for navigation purposes to serve his need of travel by pursuing the cheapest or the shortest path as per his wish. Every user will be able to choose whether he is a client or an administrator based on the option they choose. Based on the choice made, a corresponding \textbf{Admin(User)} or \texttt{Client(User)} is created and the respective methods are called. Both the client and the admin are subclasses of abstract user class.
+
+    Our project represents the metro transit map of a city/region as a graph and utilize it by displaying the best possible shortest or cheapest route. It can be used by 2 types of users, the administrator and the client. The administrator has the ability to modify the map and save the result into a database. The client utilizes the map for navigation purposes to serve his need of travel by pursuing the cheapest or the shortest path as per his wish. Every user will be able to choose whether he is a client or an administrator . Based on the choice made, a corresponding \texttt{Admin(User)} or \texttt{Client(User)} is created and the respective methods are called. Both the client and the admin are subclasses of abstract user class.
 
 
     \subsection*{Creating the map}
@@ -69,46 +69,46 @@
     \begin{enumerate}
         \item The Admin, after having created the map, automatically saves his creation (or edits if the map was pre-existing).
 
-        \item The User will be able to access the cities the currently have a plan associated with them, and can choose the city for which the optimization is desired.
+        \item The User will be able to access the cities that currently have a plan associated with them, and can choose the city for which the optimization is desired.
 
         \item The Admin also has access to previously created maps, should it be required to edit an existing plan.
     \end{enumerate}
 
-    As seen above, the read/write queries made is quite frequent. Moreover, there are several graphs, of which nodes have several attributes. Thus, it would not be ideal to use a csv file for the storage and retrieval of such data, due to the inefficiency and complexity. Therefore, a lightweight RDBMS alternative was required, and the storage was instead performed with SQLite using the python library \texttt{sqlite3}.
+    As seen above, the read/write queries made are quite frequent. Moreover, there are several graphs, of which nodes have several attributes. Thus, it would not be ideal to use a csv file for the storage and retrieval of such data, due to the inefficiency and complexity. Therefore, a lightweight RDBMS alternative was required, and the storage was instead performed with SQLite using the python library \texttt{sqlite3}.
 
-    There are two tables. The first table represents the nodes of the metro maps, while the second represents the relations between each node with others. The first table had columns representing the cities, and every other attribute represented the attributes part of the \texttt{Node} object is the maps. This is similarly true for the connections table. This extra cities column was necessary so as to perform queries of adding and deleting information on the same map. This was done by filtering the database on the basis of city name.
+    There are two tables. The first table represents the nodes of the metro maps, while the second represents the relations between each node with others. The first table had columns representing the cities, and every other attribute represents their counterparts in the \texttt{Node} object. This is similarly true for the connections table. This extra cities column was necessary so as to perform queries of adding and deleting information on the same map. This was done by filtering the database on the basis of city name.
 
-    Since each read/write occurred together and was localized for each map,  no minor updates were needed to be taken care of. Hence, there was no usage of a primary and foreign key to link the two tables. However, it should be noted that this implementation is much more efficient, as the task of ensuring uniqueness had to be dealt with in \texttt{python} by OpenMetroGuide.
+    Since each read/write occurred together and was localized for each map,  no minor updates were needed to be taken care of. Hence, there was no usage of a primary and foreign key to link the two tables. However, it should be noted that this implementation is much more efficient, as the task of ensuring uniqueness had to be dealt with in \texttt{python} by Optimized Metro Guide.
 
     \subsection*{Implementing the map}
-    Just the administrator, the user will have the option to choose from one of the existing maps(they won't be able to create a new map, obviously). The user interface will consist of an interactive map created by the admin. A complete map of the metro will be displayed on the screen (reading from local database) and the user will be able to choose a starting station and a final destination station by selecting the stations on the map. A right click will be used to select the destination station and the left click will will indicate the starting station.The selected station will indicate whether they are the starting station or the destination station when selected.\\
+    Like the admin, the client will have the option to choose from one of the existing maps(they would not be able to create a new map). The user interface will consist of an interactive map created by the admin. A complete map of the metro will be displayed on the screen (reading from local database) and the user will be able to choose a starting station and a final destination station by selecting the stations on the map. A right click will be used to select the destination station and the left click will will indicate the starting station.The selected station will indicate whether they are the starting station or the destination station when selected.\\
     They will also be able to choose whether they want a time-optimized or a cost-optimized route which will be represented by 2 images on the right side of the map. The images were inserted using the \textbf{pygame.image.load()} function. The selection is done with the same concept as described above in the case of creating the map.\\
     Based on these inputs, our application will provide the best route using the A* search algorithm.\\
     \\
     We will be using a weighted graph, where the vertices are train stations (with an attribute for direct distance from the destination) and the weighted edges represent the path between adjacent stations with a length attribute. \\
     \\
     Dijkstra's algorithm is an optimization algorithm to find "the shortest paths between nodes in a graph". This algorithm will be implemented using a priority queue based on the above-mentioned heuristics. The priority queue will be a list of stations ordered based on the cumulated edge lengths combined with either distance from destination or cost. All (unvisited) nodes are initially marked at a distance of infinity from the starting node (which is passed in as the current node). The shortest route will be calculated by prioritizing the distance and edge length whereas the cheapest route will be calculated by giving cost and edge length more importance. Each of the current node's neighbors (except the previously visited ones in the current recursion stack) is given a numeric value based on the weighted edges. Once the destination station is reached, we retrace the stations using recursion till the start station which will be the optimum route. \textbf{The A* search algorithm is an extension of this algorithm to help minimize the number of recursive calls made based on an additional "cost" or "overall distance" parameter}.\\
-    This is implemented when the client class object uses its \texttt{metro\_map} attribute (this is the map the client has selected to use) calls the \texttt{optimized\_route} function providing the parameters of the start station, final station, and preference between cost and distance entered by the user. As per the algorithm, this function creates a list implemented as a priority queue. A dataclass names \texttt{QueueElement} is created to to access each of the nodes \footnote{Each track(edge) is formed between 2 nodes(vertices). These nodes can either represent a station or a corner(a nameless point used for the ease in the representation of the map)} stored in the queue. It also has instance attributes such as:
+    This is implemented when the client class object uses its \texttt{metro\_map} attribute (this is the map the client has selected to use) calls the \texttt{optimized\_route} function providing the parameters of the start station, final station, and preference between cost and distance entered by the user. As per the algorithm, this function creates a list implemented as a priority queue. A dataclass named \texttt{QueueElement} is created to to access each of the nodes \footnote{Each track(edge) is formed between 2 nodes(vertices). These nodes can either represent a station or a corner(a nameless point used for the ease in the representation of the map)} stored in the queue. It also has instance attributes such as:
     \begin{itemize}
         \item  \textit{name}
         \item \textit{distance between the current node and the destination station }
-        \item \textit{score from the start} which is the weight of the track(either adjacent distance or cost). The adjacent distance is calculated by finding the Cartesian distance between the 2 stations. The cost is calculated by checking whether track connecting the 2 nodes are in the same zone or not. If in the same zone then they are given a weight of 1 otherwise 2.
-        \item \textit{total score} which represents the combined score the distance to destination of each node and score from the start
+        \item \textit{score from the start} which is the weight of the track(either adjacent distance or cost). The adjacent distance is calculated by finding the Cartesian distance between the 2 stations. The cost is calculated by checking whether track connecting the 2 nodes are in the same zone or not. If in the same zone then they are given a weight of 0 otherwise 1.
+        \item \textit{total score} which represents the combined score the distance to destination of each node and score from the start for distance optimization, and just score from start for cost optimization.
         \item an optional attribute of \textit{previous station} to keep track of the path to be used.
     \end{itemize}
-    As each of the station from the top of the priority queue is explored, it is removed from the queue when all of its neighbours have been explored. The next station in the queue will then be the one which the lowest total score and the process is repeated. This continues until the destination station is reached and once that is removed from the queue, the iteration stops and we have our optimized path.
+    As each of the station from the top of the priority queue is explored, it is removed from the queue when all of its neighbours have been explored. The next station in the queue will then be the one which has the lowest total score and the process is repeated. This continues until the destination station is reached and once that is removed from the queue, the iteration stops and we have our optimized path.
     \\
-    After the best possible path is calculated as per the user's requirements, this application will display the same transit map as described above highlighting the best possible route and blurring the rest of the map by making the rest of the tracks grey. The route will be color-coordinated based on what metro lines have to be taken. This is done by alternating between the actual color of the track and grey depending on whether the each node in the map is a part of the final map or not.
+    After the best possible path is calculated as per the user's requirements, this application will display the same transit map as described above highlighting the best possible route and blurring the rest of the map by making the rest of the tracks grey. The route will be color-coordinated based on what metro lines have to be taken. This is done by alternating between the actual color of the track and grey depending on whether the each node in the map is a part of the final route or not.
 
 
     \section*{Instructions for running the application}
-    To run the application, the packages under \texttt{requirements.txt} must be added and \texttt{main.py} needs to be run. The user of the application will be presented with a dialogue box asking whether they wish to run the application as a \texttt{admin}, i.e., administrator or a client. The user may interact with this screen by pressing the up and down arrows and press Enter(Return for MacOS) to go along with one of the options. A new set of pop up screens will appear accordingly based on the choice.\\
+    To run the application, the packages under \texttt{requirements.txt} must be added and \texttt{main.py} needs to be run. The user of the application will be presented with a dialogue box asking whether they wish to run the application as an \texttt{admin}, i.e., administrator or a \texttt{client}. The user may interact with this screen by pressing the up and down arrows and press Enter(Return for MacOS) to go along with one of the options. A new set of pop up screens will appear accordingly based on the choice.\\
     \begin{center}
         \includegraphics[width = 5cm]{admin or client.png}\newline
     \end{center}
 
     \subsection*{Admin}
-    If the user chose to work as the admin, they will be presented with a screen to either create a new map or select and existing map(if any).The maps existing in the database can be searched through using the left or right arrow key. The options between an existing map and creating a new map can be selected by using the up or down arrow key.\\
+    If the user chose to work as the admin, they will be presented with a screen to either create a new map or select an existing map(if any).The maps existing in the database can be searched through using the left or right arrow key. The options between an existing map and creating a new map can be selected by using the up or down arrow key.\\
     \begin{center}
         \includegraphics[width = 5cm]{Sample in database.png}\\
     \end{center}
@@ -116,15 +116,15 @@
     \begin{center}
         \includegraphics[width = 5cm]{create new map.png}\\
     \end{center}
-    There can be 2 cases depending on whether a new map is chosen or a pre-existing one.
+    There can be 2 cases depending on whether the admin wants to create a new map or choose a pre-existing one.
     \begin{itemize}
-        \item If the creation of a new map is selected, the admin will be able to add enter the name of the city to be added and stored in the database. This is followed by an empty map screen itself containing grids to make the transit map.
+        \item If the creation of a new map is selected, the admin will be able to enter the name of the city to be added and stored in the database. This is followed by an empty map screen containing grids to make the transit map.
         \begin{center}
             \includegraphics[width = 5cm]{enter city name.png} \quad
             \includegraphics[width = 5cm]{blank map screen.png}
         \end{center}
 
-        \item The dialogue box to enter the name is not popped up if an existing map is selected. The map containing the grid is directly displayed.
+        \item The dialogue box to enter the name is not popped up if an existing map is selected. The map of the selected city is directly displayed.
         \\
         \begin{center}
             \includegraphics[width = 5cm]{Sample Map.png}
@@ -132,13 +132,13 @@
     \end{itemize}
     The admin can \textbf{left click to insert a station}. Doing so will pop up another screen asking for the name and zone of the station added. \\
     \begin{center}
-        \includegraphics[width = 7cm]{station info.png}\\
+        \includegraphics[width = 7cm]{enter station info.png}\\
     \end{center}
-    The admin can also \textbf{create tracks by right clicking} on the screen. They may also change the color of the track by selecting a color from the palette provided on the right hand side. The station can be \textbf{removed by left-clink again} on an existing station. Similarly, a track can be \textbf{removed by right clicking} on an existing track.\\
+    The admin can also \textbf{create tracks by right clicking} on the screen. They may also change the color of the track by selecting a color from the palette provided on the right hand side. The station can be \textbf{removed by left-clicking again} on an existing station. Similarly, a track can be \textbf{removed by right clicking} on an existing track.\\
     Once the map has been created, the admin may exit the screen by clicking on the cross of the window. This will automatically save the map onto the database.
 
     \subsection*{Client}
-    If the user chooses to work as the client, they are displayed with a pop up box asking to select one of the pre-existing map they wish to navigate.\\
+    If the user chooses to work as the client, they are displayed with a pop up box asking to select one of the pre-existing maps they wish to navigate.\\
     \begin{center}
         \includegraphics[width = 5cm]{client select city.png}\\
     \end{center}
@@ -150,18 +150,18 @@
     \begin{center}
         \includegraphics[width = 5cm]{client sample map.png}\\
     \end{center}
-    The client can choose a starting station by \textbf{left clicking} on a station. They can choose a destination station by \textbf{right clicking} on the other station. They can also choose their route of preference whether they want to find the shortest route or the cheapest route(default selected as the shortest) on the palette provided on the right side of the screen.\\
-    As soon as the stations are selected, the optimized path is displayed based on the preference greying out the rest of the tracks.\\
+    The client can choose a starting station by \textbf{left clicking} on a station. They can choose a destination station by \textbf{right clicking} on the other station. They can also choose their route of preference whether they want to find the shortest route or the cheapest route (default selected as the shortest) on the palette provided on the right side of the screen.\\
+    As soon as the stations are selected, the optimized path is displayed based on the preference and the rest of the tracks are greyed out.\\
     \begin{center}
         \includegraphics[width = 5cm]{client shortest route.png} \quad
         \includegraphics[width = 5cm]{client cheapest route.png}
     \end{center}
     Both the client and the admin may also hover over the existing stations to find more information about them. \\
-    
-    In our submission, we are including a database (\texttt{map\_storage.db}) which is already filled with three metro maps built by Admin. This merely serves as a template, and you are welcome to create more maps by following the above instructions.  
+
+    In our submission, we are including a database (\texttt{map\_storage.db}) which is already filled with three metro maps built by Admin. This merely serves as a template, and you are welcome to create more maps by following the above instructions.
 
     \section*{Changes to the project}
-    The way we have implemented our project is very similar to what was described in the project proposal itself, implementing client as well as admin portion of the user. We have made a few map making changes where we have let the admin to design their own map providing a few sample maps to cross-check the functioning instead of us making pre-made maps for cities such as Dubai and Toronto.\\
+    The way we have implemented our project is very similar to what was described in the project proposal itself, i.e., implementing client as well as admin portion of the user. We have made a few map making changes where we let the admin design their own map, and we have provided a few sample maps to cross-check the functioning instead of making pre-made maps for cities such as Dubai and Toronto.\\
     \\
     We also have not yet implemented the resizing of the map window and how that will affect the grids and the map itself. As discussed above, we implemented the TA's suggestion of using Hamiltonian graphs to check whether our map was connected or not.
 
@@ -170,15 +170,15 @@
 
     To work towards accomplishing both our goals, we have divided our computational plan into two parts: creating and using the metro map. \\
 
-    The 'Client' part of our application effectively calculates the shortest path between two stations (based on a score factor of cost or distance, and taking zone into account as well) using the A* implementation of Dijkstra's algorithm and then highlights the appropriate path on the screen. The client of our application can view previously created metro maps of certain cities, and then use them to figure out the best possible path between any two stations.\\
+    The `Client' part of our application effectively calculates the shortest path between two stations (based on a score factor of cost or distance, and taking zone into account as well) using the A* implementation of Dijkstra's algorithm and then highlights the appropriate path on the screen. The client of our application can view previously created metro maps of certain cities, and then use them to figure out the best possible path between any two stations.\\
 
-    The 'Admin' part of our application is responsible for creating and storing maps. By left-clicking on the grid, we can create new stations, and by right-clicking on the grid, we can create new tracks. Even though the admin does a lot of computations behind the scenes, it is still not sufficiently complex enough for us to be able to fully realize our second goal. Since we only allow inputs in the form of pygame mouse click event objects, it is hard to create metro maps from previously available data, much less maintain them in real time. Moreover, our application only allows tracks in the cardinal and intercardinal directions (north, south, east, west, NE, SE, NW, and SW) and so creating an accurate copy of the actual metro map is difficult. Another challenge that we experienced algorithmically was that we could not ensure a minimum constraint of 3 stations in a cycle of the map. This means that there can be two different paths between two adjacent stations, and a track that starts and ends at the same station without visiting any other stations. \\
+    The `Admin' part of our application is responsible for creating and storing maps. Even though the admin does a lot of computations behind the scenes, it is still not sufficiently complex enough for us to be able to fully realize our second goal. Since we only allow inputs in the form of pygame mouse click event objects, it is hard to create metro maps from previously available data, much less maintain them in real time. Moreover, our application only allows tracks in the cardinal and intercardinal directions (north, south, east, west, NE, SE, NW, and SW) and so creating an accurate copy of the actual metro map is difficult. Another challenge that we experienced algorithmically was that we could not ensure a minimum constraint of 3 stations in a cycle of the map. This means that there can be two different paths between two adjacent stations, and a track that starts and ends at the same station without visiting any other stations. \\
 
     With respect to the implementation of storage using a relational database, as mentioned earlier, the current rendition could be improved upon. The projects storage functionality can be made much more versatile and readable if relations between the two tables are implemented in SQL itself. \\
 
     For further exploration, we would like to expand our application to accept inputs in a more geographically accurate form, so as to maximize the effect of our optimization algorithms. Additionally, we would like to allow the admin to rename and delete maps from the database. We would also like to augment attributes onto our current map that keep track of real time changes (like whether a track is under maintenance or a train has been delayed). By converting this into a web application, certified users across the world will be able to create metro maps for their cities, and the general public could use them to make their travel convenient. \\
 
-    <name> is currently a humble project with the potential to develop into a global transit application. We hope that over time, as we develop new skills, we will be able to make <name> widely available to people across the world, and with the help of the online community, make it an open standard for use by tourists and residents alike.
+    Optimized Metro Guide is currently a humble project with the potential to develop into a global transit application. We hope that over time, as we develop new skills, we will be able to make Optimized Metro Guide widely available to people across the world, and with the help of the online community, make it an open standard for use by tourists and residents alike.
     \section*{References}
     \begin{enumerate}
         \item Computerphile. (2017, January 4). Dijkstra's Algorithm - Computerphile. Youtube. https://www.youtube.com/watch?v=GazC3A4OQTE
@@ -186,6 +186,7 @@
         \item Pygame. (n.d.). Pygame Documentation. Pygame Documentation. https://www.pygame.org/docs/
         \item Shahin, S. (2019, October 9). Back to Basics — Divine Algorithms Vol I: Dijkstra’s Algorithm. Blue Harvest Tech Blog. https://medium.com/blue-harvest-tech-blog/back-to-basics-divine-algorithms-vol-i-dijkstras-algorithm-bf46705f5578
         \item Singhal, A. (2020). Hamiltonian Graph | Hamiltonian Path | Hamiltonian Circuit. Gate Vidyalay. https://www.gatevidyalay.com/hamiltonian-graphs-hamiltonian-path-hamiltonian-circuit/\#:~:text=A\%20Hamiltonian\%20graph\%20may\%20be,called\%20as\%20a\%20Hamiltonian\%20graph.
+        \item SQLite. (2000, August 17). SQLite. SQLite. https://sqlite.org/docs.html
 
     \end{enumerate}
 
