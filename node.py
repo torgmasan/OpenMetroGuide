@@ -37,7 +37,6 @@ class Node:
         """Initialize a new Station object."""
         self.name = name
         self._neighbouring_nodes = {}
-        # self.colors = colors
         self.coordinates = coordinates
         self.is_station = is_station
         self.zone = zone

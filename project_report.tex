@@ -110,7 +110,7 @@
     \subsection*{Admin}
     If the user chose to work as the admin, they will be presented with a screen to either create a new map or select and existing map(if any).The maps existing in the database can be searched through using the left or right arrow key. The options between an existing map and creating a new map can be selected by using the up or down arrow key.\\
     \begin{center}
-        \includegraphics[width = 5cm]{Sample in databse.png}\\
+        \includegraphics[width = 5cm]{Sample in database.png}\\
     \end{center}
     If there are no pre-existing maps, 'create new map' is auto-selected and the application can proceed by pressing Enter(Return for MacOS).\\
     \begin{center}
@@ -132,7 +132,7 @@
     \end{itemize}
     The admin can \textbf{left click to insert a station}. Doing so will pop up another screen asking for the name and zone of the station added. \\
     \begin{center}
-        \includegraphics[width = 7cm]{enter station info.png}\\
+        \includegraphics[width = 7cm]{station info.png}\\
     \end{center}
     The admin can also \textbf{create tracks by right clicking} on the screen. They may also change the color of the track by selecting a color from the palette provided on the right hand side. The station can be \textbf{removed by left-clink again} on an existing station. Similarly, a track can be \textbf{removed by right clicking} on an existing track.\\
     Once the map has been created, the admin may exit the screen by clicking on the cross of the window. This will automatically save the map onto the database.
@@ -156,7 +156,9 @@
         \includegraphics[width = 5cm]{client shortest route.png} \quad
         \includegraphics[width = 5cm]{client cheapest route.png}
     \end{center}
-    Both the client and the admin may also hover over the existing stations to find more information about them.
+    Both the client and the admin may also hover over the existing stations to find more information about them. \\
+    
+    In our submission, we are including a database (\texttt{map\_storage.db}) which is already filled with three metro maps built by Admin. This merely serves as a template, and you are welcome to create more maps by following the above instructions.  
 
     \section*{Changes to the project}
     The way we have implemented our project is very similar to what was described in the project proposal itself, implementing client as well as admin portion of the user. We have made a few map making changes where we have let the admin to design their own map providing a few sample maps to cross-check the functioning instead of us making pre-made maps for cities such as Dubai and Toronto.\\
