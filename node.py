@@ -28,7 +28,7 @@ class Node:
     name: str
     # colors: set[str]
     is_station: bool
-    _neighbouring_nodes: dict[Node, tuple[float, int, str]]
+    _neighbouring_nodes: dict[Node, tuple[float, float, str]]
     coordinates: tuple[int, int]
     zone: Any
 
@@ -140,14 +140,18 @@ class Node:
         weight = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
         return weight
 
-    def count_zones(self, destination_node: Node) -> int:
+    def count_zones(self, destination_node: Node) -> float:
         """Returns the cost in terms of base units (where a base unit
         is the price from two nodes in the same zone)."""
-        if self.zone == destination_node.zone or self.zone == ''\
-                or destination_node.zone == '':
+        visit_1, visit_2 = {destination_node}, {self}
+
+        st_1 = self.get_closest_station(visit_1)
+        st_2 = destination_node.get_closest_station(visit_2)
+
+        if st_1 is None or st_2 is None or st_1.zone == st_2.zone:
             return 0
         else:
-            return 1
+            return 1 / (len(visit_1) + len(visit_2) - 1)
 
 
 if __name__ == '__main__':
