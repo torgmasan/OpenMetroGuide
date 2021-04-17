@@ -132,7 +132,7 @@ class Map:
         Raise ValueError if no such track exists.
 
         Preconditions:
-            optimization in {'distance', 'cost'}
+            - optimization in {'distance', 'cost'}
         """
         if name_1 and name_2 in self._nodes:
             node_1 = self._nodes[name_1]
@@ -173,7 +173,7 @@ class Map:
                     update_element(node_queue, node.name,
                                    to_add + curr_element.score_from_start, curr_element, optimization)
                 sort_queue(node_queue)
-
+        # breakpoint()
         return get_path(curr_element)
 
 
