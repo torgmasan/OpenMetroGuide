@@ -230,7 +230,6 @@ def set_selection() -> None:
 
 
 if __name__ == "__main__":
-    run_home()
     import doctest
 
     doctest.testmod()

@@ -165,7 +165,7 @@ class Admin(User):
         """Return whether the nodes in self.active_nodes form a connected map
         and there are stations at both ends of the metro line(s).
         """
-        no_of_stations = len([node_1 for node_1 in self.active_nodes if node_1.is_station])
+        no_of_stations = len([node for node in self.active_nodes if node.is_station])
         if no_of_stations == 0:
             return 'MAP IS INCOMPLETE'
 

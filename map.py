@@ -171,7 +171,8 @@ class Map:
 
                 if get_element(node_queue, node.name) is not None:
                     update_element(node_queue, node.name,
-                                   to_add + curr_element.score_from_start, curr_element, optimization)
+                                   to_add + curr_element.score_from_start, curr_element,
+                                   optimization)
                 sort_queue(node_queue)
 
         return get_path(curr_element)
