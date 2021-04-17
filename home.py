@@ -108,7 +108,8 @@ def run_home() -> None:
 
 
 def _display_correct_screen() -> None:
-    """Helper function to ...
+    """Helper function to choose the correct screen to
+    refresh.
     """
     if screen_type == 0:
         refresh_display()
