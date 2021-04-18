@@ -156,16 +156,3 @@ class Node:
             return 0
         else:
             return 1 / (len(visit_1) + len(visit_2) - 1)
-
-
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
-
-    import python_ta
-    python_ta.check_all(config={
-        'max-line-length': 100,
-        'disable': ['E1136'],
-        'extra-imports': ['math'],
-        'max-nested-blocks': 4
-    })

@@ -227,18 +227,3 @@ def set_selection() -> None:
                          (5, 100, screen.get_width() - 10, 55), 3)
         pygame.draw.rect(screen, BLACK,
                          (5, 200, screen.get_width() - 10, 55), 3)
-
-
-if __name__ == "__main__":
-    import doctest
-
-    doctest.testmod()
-    import python_ta
-
-    python_ta.check_all(config={
-        'max-line-length': 100,
-        'disable': ['E1136', 'E1101', 'C0103', 'E9997', 'R0912'],
-        'extra-imports': ['node', 'math', 'pygame', 'pygame.colordict', 'sys',
-                          'user', 'canvas_utils', 'map', 'storage_manager'],
-        'max-nested-blocks': 6
-    })

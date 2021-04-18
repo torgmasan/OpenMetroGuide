@@ -140,16 +140,3 @@ def get_cities() -> list[str]:
             ret_set.add(element[0])
 
     return list(ret_set)
-
-
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
-
-    import python_ta
-    python_ta.check_all(config={
-        'max-line-length': 100,
-        'disable': ['E9969', 'E9988'],
-        'extra-imports': ['sqlite3', 'map', 'node'],
-        'max-nested-blocks': 4
-    })

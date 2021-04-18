@@ -666,17 +666,3 @@ class Client(User):
                           (node.coordinates[0] + 4, node.coordinates[1] - 15))
 
         return
-
-
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
-
-    import python_ta
-    python_ta.check_all(config={
-        'max-line-length': 100,
-        'disable': ['E1101', 'E1136', ],
-        'extra-imports': ['map', 'node', 'canvas_utils', 'storage_manager', 'pygame', 'sys',
-                          'pygame.colordict'],
-        'max-nested-blocks': 5
-    })
