@@ -109,3 +109,9 @@ def in_circle(radius: int, centre_coordinates: tuple[int, int],
 
     return dist <= radius
 
+
+def scale_factor_transformations(actual: tuple[int, int], scale_factor: int,
+                                 shift: int) -> tuple[int, int]:
+    """Transforms the actual location (scale factor of 1) to where it should be displayed on
+    the map"""
+    pass

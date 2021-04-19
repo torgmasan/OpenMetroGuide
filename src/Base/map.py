@@ -6,7 +6,7 @@ from typing import Optional
 
 from dataclasses import dataclass
 import math
-from node import Node
+from src.Base.node import Node
 
 
 @dataclass

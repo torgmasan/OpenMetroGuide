@@ -3,13 +3,13 @@ OpenMetroGuide (currently local database). It will handle reading and writing
 to be used by all pygame windows that interact with stored Metro lines.
 """
 import sqlite3
-from map import Map
-from node import Node
+from src.Base.map import Map
+from src.Base.node import Node
 
 
 def init_db() -> None:
     """Initializes the database with tables as required."""
-    conn = sqlite3.connect('map_storage.db')
+    conn = sqlite3.connect('../Utils/map_storage.db')
     cursor = conn.cursor()
 
     with conn:
@@ -31,7 +31,7 @@ def store_map(city: str, active_nodes: set) -> None:
     Preconditions:
         - Used by Admin only.
     """
-    conn = sqlite3.connect('map_storage.db')
+    conn = sqlite3.connect('../Utils/map_storage.db')
     cursor = conn.cursor()
 
     active_rows = create_rows_stations(city, active_nodes)
@@ -105,7 +105,7 @@ def get_map(city: str) -> Map:
     Preconditions:
         - city exists in the local database
     """
-    conn = sqlite3.connect('map_storage.db')
+    conn = sqlite3.connect('../Utils/map_storage.db')
     cursor = conn.cursor()
     metro_map = Map()
 
@@ -129,7 +129,7 @@ def get_map(city: str) -> Map:
 
 def get_cities() -> list[str]:
     """Get all the possible city options in the current local database"""
-    conn = sqlite3.connect('map_storage.db')
+    conn = sqlite3.connect('../Utils/map_storage.db')
     cursor = conn.cursor()
     ret_set = set()
 

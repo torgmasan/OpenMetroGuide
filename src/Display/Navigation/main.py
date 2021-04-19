@@ -13,7 +13,7 @@ NOTES:
       The exceptions to this is the final step of creating/editing the map. After making
       the changes required, CLOSE the window. The data is auto-saved in the database.
 """
-from home import run_home
+from src.Display.Navigation.home import run_home
 
 if __name__ == '__main__':
     run_home()

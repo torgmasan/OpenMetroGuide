@@ -4,11 +4,12 @@ import sys
 import pygame
 from pygame.colordict import THECOLORS
 
-import user
-from canvas_utils import draw_text, WHITE, BLACK, initialize_screen
-from map import Map
+from src.Display.Canvas.admin import Admin
+from src.Display.Utils.general_utils import draw_text, WHITE, BLACK, initialize_screen
+from src.Display.Canvas.client import Client
+from src.Base.map import Map
 
-from storage_manager import get_map, init_db, get_cities
+from src.Display.Utils.storage_manager import get_map, init_db, get_cities
 
 init_db()
 screen_type = 0
@@ -130,11 +131,11 @@ def next_user(city_name: str, metro_map: Map) -> None:
         metro_map = get_map(city_name)
 
     if is_admin:
-        admin = user.Admin(city_name, metro_map)
+        admin = Admin(city_name, metro_map)
         admin.display()
 
     else:
-        client = user.Client(metro_map, city_name)
+        client = Client(metro_map, city_name)
         client.display()
 
 
