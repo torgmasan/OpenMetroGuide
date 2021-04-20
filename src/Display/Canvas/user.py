@@ -89,25 +89,25 @@ class User:
         """
         pass
 
-    def handle_u_shift(self) -> None:
+    def handle_d_shift(self) -> None:
         """Handles key down even for up shift
         """
         shift = WIDTH // GRID_SIZE
         self._curr_shift[1] += shift
 
-    def handle_d_shift(self) -> None:
+    def handle_u_shift(self) -> None:
         """Handles key down even for down shift
         """
         shift = WIDTH // GRID_SIZE
         self._curr_shift[1] -= shift
 
-    def handle_l_shift(self) -> None:
+    def handle_r_shift(self) -> None:
         """Handles key down even for left shift
         """
         shift = WIDTH // GRID_SIZE
         self._curr_shift[0] += shift
 
-    def handle_r_shift(self) -> None:
+    def handle_l_shift(self) -> None:
         """Handles key down even for right shift
         """
         shift = WIDTH // GRID_SIZE
