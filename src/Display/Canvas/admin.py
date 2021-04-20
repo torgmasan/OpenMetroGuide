@@ -34,6 +34,7 @@ class Admin(User):
 
     def display(self) -> None:
         """Performs the display of the screen for an Admin"""
+
         while True:
             self._screen.fill(WHITE)
             self.draw_grid()
@@ -44,21 +45,35 @@ class Admin(User):
             for node in self.active_nodes:
                 visited.add(node)
                 if node.is_station:
-                    pygame.draw.circle(self._screen, BLACK, node.coordinates, 5)
+                    pygame.draw.circle(self._screen, BLACK, self.scale_factor_transformations(node.coordinates), 5)
+
                 for u in node.get_neighbours():
                     if u not in visited:
-                        pygame.draw.line(self._screen, node.get_color(u), node.coordinates,
-                                         u.coordinates, 3)
+                        pygame.draw.line(self._screen, node.get_color(u),
+                                         self.scale_factor_transformations(node.coordinates),
+                                         self.scale_factor_transformations(u.coordinates), 3)
 
             draw_text(self._screen, self.is_proper_map(), 17, (10, 10))
 
             for event in pygame.event.get():
+
                 if event.type == pygame.QUIT and self.is_proper_map() == '':
                     init_db()
                     store_map(self.city_name, self.active_nodes)
                     sys.exit()
+
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     self.handle_mouse_click(event, (WIDTH, HEIGHT))
+
+                elif event.type == pygame.KEYUP:
+                    if event.key == pygame.K_DOWN:
+                        self.handle_d_shift()
+                    elif event.key == pygame.K_UP:
+                        self.handle_u_shift()
+                    elif event.key == pygame.K_LEFT:
+                        self.handle_l_shift()
+                    elif event.key == pygame.K_RIGHT:
+                        self.handle_r_shift()
 
             self.hover_display()
 
@@ -68,7 +83,7 @@ class Admin(User):
         """Return the node if it exists at given coordinates. Else, return None.
         """
         for node in self.active_nodes:
-            if node.coordinates == coordinates:
+            if self.scale_factor_transformations(node.coordinates) == coordinates:
                 return node
         return None
 
@@ -108,10 +123,12 @@ class Admin(User):
         """Gains the current nodes which can be displayed through
         the self.active_nodes attribute. Provides information on both name and zone."""
         for node in self.active_nodes:
-            if in_circle(5, node.coordinates, pygame.mouse.get_pos()) and node.is_station:
+            if in_circle(5, self.scale_factor_transformations(node.coordinates),
+                         pygame.mouse.get_pos()) and node.is_station:
                 show = node.name + ' ' + str(node.coordinates)
                 draw_text(self._screen, show, 17,
-                          (node.coordinates[0] + 4, node.coordinates[1] - 15))
+                          (self.scale_factor_transformations(node.coordinates)[0] + 4,
+                           self.scale_factor_transformations(node.coordinates)[1] - 15))
 
     def handle_mouse_click(self, event: pygame.event.Event,
                            screen_size: tuple[int, int]) -> None:
@@ -136,8 +153,8 @@ class Admin(User):
 
         Preconditions:
             - event.type == pygame.MOUSEBUTTONDOWN
-            - screen_size[0] >= ...
-            - screen_size[1] >= ...
+            - screen_size[0] <= 800
+            - screen_size[1] <= 800
         """
         if event.pos[0] > WIDTH:  # The click is on the color palette
             radius = (PALETTE_WIDTH // 2)
@@ -163,23 +180,27 @@ class Admin(User):
 
         # One of the nodes already exists, the other node has to be created and linked to
         # the pre-existing node
+
+        make_coordinates = (self.scale_factor_transformations(line_coordinates[0], True),
+                            self.scale_factor_transformations(line_coordinates[1], True))
+
         if n_1 is None and n_2 is not None:
-            n_1 = Node(name=str(line_coordinates[0]), is_station=False,
-                       coordinates=line_coordinates[0], zone='')
+            n_1 = Node(name=str(make_coordinates[0]), is_station=False,
+                       coordinates=make_coordinates[0], zone='')
             self.active_nodes.add(n_1)
             n_1.add_track(n_2, self._curr_opt)
         elif n_1 is not None and n_2 is None:
-            n_2 = Node(name=str(line_coordinates[1]), is_station=False,
-                       coordinates=line_coordinates[1], zone='')
+            n_2 = Node(name=str(make_coordinates[1]), is_station=False,
+                       coordinates=make_coordinates[1], zone='')
             self.active_nodes.add(n_2)
             n_1.add_track(n_2, self._curr_opt)
 
         # Both nodes need to be created and linked to each other
         elif n_1 is None and n_2 is None:
-            n_1 = Node(name=str(line_coordinates[0]), is_station=False,
-                       coordinates=line_coordinates[0], zone='')
-            n_2 = Node(name=str(line_coordinates[1]), is_station=False,
-                       coordinates=line_coordinates[1], zone='')
+            n_1 = Node(name=str(make_coordinates[0]), is_station=False,
+                       coordinates=make_coordinates[0], zone='')
+            n_2 = Node(name=str(make_coordinates[1]), is_station=False,
+                       coordinates=make_coordinates[1], zone='')
             self.active_nodes.add(n_1)
             self.active_nodes.add(n_2)
             n_1.add_track(n_2, self._curr_opt)
@@ -287,7 +308,7 @@ class Admin(User):
 
             if not chk[0]:
                 initialize_screen((WIDTH + PALETTE_WIDTH, HEIGHT))
-                station = Node(name=info[0], coordinates=coordinates,
+                station = Node(name=info[0], coordinates=self.scale_factor_transformations(coordinates, True),
                                is_station=True, zone=info[1])
 
                 if replace is not None:

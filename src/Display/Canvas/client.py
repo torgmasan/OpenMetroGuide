@@ -84,20 +84,13 @@ class Client(User):
 
         else:  # The click is on the map.
 
-            for station in self.metro_map.get_all_nodes('station'):
+            station = self.node_exists(click_coordinates)
 
-                # Checks whether the click was in the vicinity of a station node
-                if in_circle(5, station.coordinates, click_coordinates):
+            if event.button == 1:
+                self._start = station
 
-                    # Selects the 'From' station creating a small box around it indicating 'From'.
-                    if event.button == 1:
-                        self._start = station
-
-                    # Selects the 'To' station creating a small box around it indicating 'To'.
-                    if event.button == 3:
-                        self._end = station
-
-                continue
+            elif event.button == 3:
+                self._end = station
 
         return
 
@@ -116,8 +109,8 @@ class Client(User):
                     color = node.get_color(neighbours)
                     pygame.draw.line(surface=self._screen,
                                      color=color,
-                                     start_pos=node.coordinates,
-                                     end_pos=neighbours.coordinates,
+                                     start_pos=self.scale_factor_transformations(node.coordinates),
+                                     end_pos=self.scale_factor_transformations(neighbours.coordinates),
                                      width=5)
 
         for node in lst:
@@ -125,8 +118,8 @@ class Client(User):
             for neighbours in node.get_neighbours():
                 pygame.draw.line(surface=self._screen,
                                  color=THECOLORS['gray50'],
-                                 start_pos=node.coordinates,
-                                 end_pos=neighbours.coordinates,
+                                 start_pos=self.scale_factor_transformations(node.coordinates),
+                                 end_pos=self.scale_factor_transformations(neighbours.coordinates),
                                  width=3)
 
         return
@@ -172,13 +165,22 @@ class Client(User):
             visited = set()
 
             for node in self.metro_map.get_all_nodes('station'):
-                pygame.draw.circle(self._screen, BLACK, node.coordinates, 5)
+                pygame.draw.circle(self._screen, BLACK, self.scale_factor_transformations(node.coordinates), 5)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     self.handle_mouse_click(event, (WIDTH, HEIGHT))
+                elif event.type == pygame.KEYUP:
+                    if event.key == pygame.K_DOWN:
+                        self.handle_d_shift()
+                    elif event.key == pygame.K_UP:
+                        self.handle_u_shift()
+                    elif event.key == pygame.K_LEFT:
+                        self.handle_l_shift()
+                    elif event.key == pygame.K_RIGHT:
+                        self.handle_r_shift()
 
             if self._start is not None and self._end is not None:
                 path = self.metro_map.optimized_route(start=self._start.name,
@@ -191,30 +193,41 @@ class Client(User):
                     visited.add(node)
                     for u in node.get_neighbours():
                         if u not in visited:
-                            pygame.draw.line(self._screen, node.get_color(u), node.coordinates,
-                                             u.coordinates, 3)
+                            pygame.draw.line(self._screen, node.get_color(u),
+                                             self.scale_factor_transformations(node.coordinates),
+                                             self.scale_factor_transformations(u.coordinates), 3)
 
             self.hover_display()
 
             pygame.display.update()
 
+    def node_exists(self, coordinates: tuple[float, float]) -> Optional[Node]:
+        """Return the node if it exists at given coordinates. Else, return None.
+        """
+        for node in self.metro_map.get_all_nodes():
+            if self.scale_factor_transformations(node.coordinates) == coordinates:
+                return node
+        return None
+
     def hover_display(self) -> None:
         """Gains the current nodes which can be displayed through
         the self.active_nodes attribute. Provides information on both name and zone."""
         for node in self.metro_map.get_all_nodes('station'):
+            transformed = self.scale_factor_transformations(node.coordinates)
+
             if node == self._start and self._start is not None:
                 show = node.name + ' ' + '(' + node.zone + ')' + ' START'
                 draw_text(self._screen, show, 17,
-                          (node.coordinates[0] + 4, node.coordinates[1] - 15), THECOLORS['green'])
+                          (transformed[0] + 4, transformed[1] - 15), THECOLORS['green'])
 
             elif node == self._end and self._start is not None:
                 show = node.name + ' ' + '(' + node.zone + ')' + ' END'
                 draw_text(self._screen, show, 17,
-                          (node.coordinates[0] + 4, node.coordinates[1] - 15), THECOLORS['red'])
+                          (transformed[0] + 4, transformed[1] - 15), THECOLORS['red'])
 
-            elif in_circle(5, node.coordinates, pygame.mouse.get_pos()):
+            elif in_circle(5, transformed, pygame.mouse.get_pos()):
                 show = node.name + ' ' + '(' + node.zone + ')'
                 draw_text(self._screen, show, 17,
-                          (node.coordinates[0] + 4, node.coordinates[1] - 15))
+                          (transformed[0] + 4, transformed[1] - 15))
 
         return

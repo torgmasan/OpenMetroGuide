@@ -2,9 +2,12 @@
 This file contains the details of abstract class User, of which
 admin and client inherit.
 """
+from typing import Optional
 
 from pygame.colordict import THECOLORS
 import pygame
+
+from src.Base.node import Node
 from src.Display.Utils.general_utils import GRID_SIZE, initialize_screen, WIDTH, HEIGHT, PALETTE_WIDTH
 
 LINE_COLORS = ['blue', 'red', 'yellow', 'green', 'brown', 'purple', 'orange',
@@ -29,6 +32,8 @@ class User:
     #               'distance' or 'cost' in the case of client.
 
     _screen: pygame.Surface
+    _curr_zoom: int
+    _curr_shift: list[int, int]
     _curr_opt: str
     opt_to_center: dict[str: tuple[int, int]]
     city_name: str
@@ -38,6 +43,8 @@ class User:
         self.opt_to_center = {}
         self._curr_opt = init_selected
         self.city_name = city_name
+        self._curr_zoom = 1
+        self._curr_shift = [0, 0]
 
     def draw_grid(self) -> None:
         """Draws a square grid on the given surface.
@@ -63,6 +70,48 @@ class User:
             pygame.draw.line(self._screen, color, (width - x, height), (width, height - y))
             pygame.draw.line(self._screen, color, (x, 0), (width, height - y))
             pygame.draw.line(self._screen, color, (0, y), (width - x, height))
+
+    def scale_factor_transformations(self, actual: tuple[int, int], reverse: bool = False) -> tuple[int, int]:
+        """Transforms the actual location (scale factor of 1) to where it should be displayed on
+        the map"""
+        if reverse:
+            return actual[0] + self._curr_shift[0], actual[1] + self._curr_shift[1]
+
+        return actual[0] - self._curr_shift[0], actual[1] - self._curr_shift[1]
+
+    def handle_zoom_out(self) -> None:
+        """Handles key down even for zooming out
+        """
+        pass
+
+    def handle_zoom_in(self) -> None:
+        """Handles key down even for zooming in
+        """
+        pass
+
+    def handle_u_shift(self) -> None:
+        """Handles key down even for up shift
+        """
+        shift = WIDTH // GRID_SIZE
+        self._curr_shift[1] += shift
+
+    def handle_d_shift(self) -> None:
+        """Handles key down even for down shift
+        """
+        shift = WIDTH // GRID_SIZE
+        self._curr_shift[1] -= shift
+
+    def handle_l_shift(self) -> None:
+        """Handles key down even for left shift
+        """
+        shift = WIDTH // GRID_SIZE
+        self._curr_shift[0] += shift
+
+    def handle_r_shift(self) -> None:
+        """Handles key down even for right shift
+        """
+        shift = WIDTH // GRID_SIZE
+        self._curr_shift[0] -= shift
 
     def handle_mouse_click(self, event: pygame.event.Event,
                            screen_size: tuple[int, int], ) -> None:
@@ -96,5 +145,10 @@ class User:
         The amount of information provided and the means of gaining this
         information is different in both scenarios.
 
+        """
+        raise NotImplementedError
+
+    def node_exists(self, coordinates: tuple[float, float]) -> Optional[Node]:
+        """Return the node if it exists at given coordinates. Else, return None.
         """
         raise NotImplementedError
