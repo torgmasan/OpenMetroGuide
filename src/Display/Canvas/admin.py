@@ -44,14 +44,25 @@ class Admin(User):
             visited = set()
             for node in self.active_nodes:
                 visited.add(node)
+                transform_node = self.scale_factor_transformations(node.coordinates)
+
                 if node.is_station:
-                    pygame.draw.circle(self._screen, BLACK, self.scale_factor_transformations(node.coordinates), 5)
+
+                    # only draw points within margin of canvas
+                    if 0 < transform_node[0] <= 800 and 0 < transform_node[1] < 800:
+                        pygame.draw.circle(self._screen, BLACK, transform_node, 5)
 
                 for u in node.get_neighbours():
                     if u not in visited:
+                        transform_u = self.scale_factor_transformations(u.coordinates)
+
+                        # avoid drawing lines over the palette. Cut it off till intercept
+                        if transform_u[0] > WIDTH or transform_node[0] > WIDTH:
+                            continue
+
                         pygame.draw.line(self._screen, node.get_color(u),
-                                         self.scale_factor_transformations(node.coordinates),
-                                         self.scale_factor_transformations(u.coordinates), 3)
+                                         transform_node,
+                                         transform_u, 3)
 
             draw_text(self._screen, self.is_proper_map(), 17, (10, 10))
 
