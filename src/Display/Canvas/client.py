@@ -73,13 +73,13 @@ class Client(User):
         pygame.init()
         click_coordinates = get_click_pos(event)
 
-        if click_coordinates[0] > WIDTH:  # The click is on the palette
+        if event.pos[0] > WIDTH:  # The click is on the palette
 
             for option in self.opt_to_center:
                 target = self.opt_to_center[option]
                 input_rect = pygame.Rect(target[0], target[1], 35, 35)
 
-                if input_rect.collidepoint(click_coordinates):
+                if input_rect.collidepoint(event.pos):
                     self._curr_opt = option
 
         else:  # The click is on the map.

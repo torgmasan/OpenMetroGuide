@@ -158,9 +158,8 @@ class Admin(User):
         """
         if event.pos[0] > WIDTH:  # The click is on the color palette
             radius = (PALETTE_WIDTH // 2)
-            coordinates = get_click_pos(event)
             for option in self.opt_to_center:
-                if in_circle(radius, self.opt_to_center[option], coordinates):
+                if in_circle(radius, self.opt_to_center[option], event.pos):
                     self.set_color(option)
                     return
 
