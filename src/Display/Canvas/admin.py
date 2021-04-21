@@ -10,12 +10,14 @@ import pygame
 from pygame.colordict import THECOLORS
 
 from src.Display.Utils.general_utils import WHITE, BLACK, draw_text, WIDTH, \
-    HEIGHT, in_circle, PALETTE_WIDTH, get_click_pos, \
-    approximate_edge_click, initialize_screen
+    HEIGHT, in_circle, PALETTE_WIDTH, initialize_screen
 from src.Base.map import Map
 from src.Base.node import Node
 from src.Display.Utils.storage_manager import init_db, store_map
-from src.Display.Canvas.user import User, LINE_COLORS
+from src.Display.Canvas.user import User
+
+LINE_COLORS = ['blue', 'red', 'yellow', 'green', 'brown', 'purple', 'orange',
+               'pink']
 
 
 class Admin(User):
@@ -188,7 +190,7 @@ class Admin(User):
 
     def _handle_right_click(self, event: pygame.event.Event) -> None:
         """Helper method for handle_mouse_click"""
-        line_coordinates = approximate_edge_click(event)
+        line_coordinates = self.approximate_edge_click(event)
         n_1 = self.node_exists(line_coordinates[0])
         n_2 = self.node_exists(line_coordinates[1])
 
@@ -238,7 +240,7 @@ class Admin(User):
 
     def _handle_left_click(self, event: pygame.event.Event) -> None:
         """Helper method for handle_mouse_click"""
-        coordinates = get_click_pos(event)
+        coordinates = self.get_click_pos(event)
         station = self.node_exists(coordinates)
 
         if station is None:

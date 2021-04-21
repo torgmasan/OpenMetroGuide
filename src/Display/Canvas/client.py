@@ -10,7 +10,7 @@ from typing import Optional
 import pygame
 from pygame.colordict import THECOLORS
 
-from src.Display.Utils.general_utils import get_click_pos, WIDTH, in_circle, PALETTE_WIDTH, \
+from src.Display.Utils.general_utils import WIDTH, in_circle, PALETTE_WIDTH, \
     BLACK, WHITE, draw_text, HEIGHT
 from src.Base.map import Map
 from src.Base.node import Node
@@ -71,7 +71,7 @@ class Client(User):
             - screen_size[1] >= ...
         """
         pygame.init()
-        click_coordinates = get_click_pos(event)
+        click_coordinates = self.get_click_pos(event)
 
         if event.pos[0] > WIDTH:  # The click is on the palette
 
