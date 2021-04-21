@@ -13,9 +13,6 @@ from src.Display.Utils.general_utils import initialize_screen, PALETTE_WIDTH, WI
 
 GRID_SIZE = 20
 
-BOX_WIDTH = WIDTH // GRID_SIZE
-BOX_HEIGHT = HEIGHT // GRID_SIZE
-
 
 class User:
     """The user class is the class that represents the 2 types of users that can access this
@@ -84,48 +81,51 @@ class User:
         v_shift = self._curr_shift[1] * (HEIGHT // (self._curr_zoom * GRID_SIZE))
 
         if reverse:
-            return (actual[0] * self._curr_zoom + h_shift,
-                    actual[1] * self._curr_zoom + v_shift)
+            return ((actual[0] + h_shift) * self._curr_zoom,
+                    (actual[1] + v_shift) * self._curr_zoom)
 
         return (actual[0] // self._curr_zoom - h_shift,
                 actual[1] // self._curr_zoom - v_shift)
 
     def handle_zoom_in(self) -> None:
-        """Handles key down even for zooming out
+        """Handles key down even for zooming in
         """
         if self._curr_zoom != 1:
             self._curr_zoom //= 2
 
     def handle_zoom_out(self) -> None:
-        """Handles key down even for zooming in
+        """Handles key down even for zooming out
         """
         if self._curr_zoom != 4:
             self._curr_zoom *= 2
 
     def handle_d_shift(self) -> None:
-        """Handles key down even for up shift
+        """Handles key down even for down shift
         """
         self._curr_shift[1] += 1
 
     def handle_u_shift(self) -> None:
-        """Handles key down even for down shift
+        """Handles key down even for up shift
         """
         self._curr_shift[1] -= 1
 
     def handle_r_shift(self) -> None:
-        """Handles key down even for left shift
+        """Handles key down even for right shift
         """
         self._curr_shift[0] += 1
 
     def handle_l_shift(self) -> None:
-        """Handles key down even for right shift
+        """Handles key down even for left shift
         """
         self._curr_shift[0] -= 1
 
     def get_click_pos(self, event: pygame.event.Event) -> tuple[int, int]:
         """Return the approximated coordinates of the mouse click for the station"""
-        return (round(event.pos[0] / BOX_WIDTH) * BOX_WIDTH,
-                round(event.pos[1] / BOX_HEIGHT) * BOX_HEIGHT)
+        box_width = WIDTH // (GRID_SIZE * self._curr_zoom)
+        box_height = HEIGHT // (GRID_SIZE * self._curr_zoom)
+        
+        return (round(event.pos[0] / box_width) * box_width,
+                round(event.pos[1] / box_height) * box_height)
 
     def approximate_edge_click(self, event: pygame.event.Event) -> tuple[tuple[int, int], tuple[int, int]]:
         """Return the approximated coordinates of the mouse click for the track.
@@ -163,11 +163,14 @@ class User:
 
         Return all edges in the box of the click (including the boundary edges).
         """
-        top_left = ((event.pos[0] // BOX_WIDTH) * BOX_WIDTH,
-                    (event.pos[1] // BOX_HEIGHT) * BOX_HEIGHT)
-        top_right = (top_left[0] + BOX_WIDTH, top_left[1])
-        bottom_left = (top_left[0], top_left[1] + BOX_HEIGHT)
-        bottom_right = (top_left[0] + BOX_WIDTH, top_left[1] + BOX_HEIGHT)
+        box_width = WIDTH // (GRID_SIZE * self._curr_zoom)
+        box_height = HEIGHT // (GRID_SIZE * self._curr_zoom)
+        
+        top_left = ((event.pos[0] // box_width) * box_width,
+                    (event.pos[1] // box_height) * box_height)
+        top_right = (top_left[0] + box_width, top_left[1])
+        bottom_left = (top_left[0], top_left[1] + box_height)
+        bottom_right = (top_left[0] + box_width, top_left[1] + box_height)
 
         return [(top_left, top_right), (top_left, bottom_left), (bottom_left, bottom_right),
                 (top_right, bottom_right), (top_left, bottom_right), (top_right, bottom_left)]
