@@ -85,6 +85,10 @@ class Admin(User):
                         self.handle_l_shift()
                     elif event.key == pygame.K_RIGHT:
                         self.handle_r_shift()
+                    elif event.key == pygame.K_p and pygame.key.get_mods() & pygame.KMOD_CTRL:
+                        self.handle_zoom_in()
+                    elif event.key == pygame.K_m and pygame.key.get_mods() & pygame.KMOD_CTRL:
+                        self.handle_zoom_out()
 
             self.hover_display()
 

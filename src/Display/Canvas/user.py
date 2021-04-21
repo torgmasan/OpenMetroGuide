@@ -30,6 +30,8 @@ class User:
     #   - screen: The screen being used by pygame.
     #   - _curr_opt: The current optimization option which can be colors in the case of admin or
     #               'distance' or 'cost' in the case of client.
+    #   - _curr_zoom: The current zoom level of the canvas
+    #   - _curr_shift: The current amount by which the map is displaced
 
     _screen: pygame.Surface
     _curr_zoom: int
@@ -55,13 +57,14 @@ class User:
         """
         color = THECOLORS['grey']
         width, height = WIDTH, HEIGHT
+        curr_grid_size = self._curr_zoom * GRID_SIZE
 
         pygame.draw.line(self._screen, color, (0, 0), (width, height))
         pygame.draw.line(self._screen, color, (0, height), (width, 0))
 
-        for dim in range(1, GRID_SIZE):
-            x = dim * (width // GRID_SIZE)  # for column (vertical lines)
-            y = dim * (height // GRID_SIZE)  # for row (horizontal lines)
+        for dim in range(1, curr_grid_size):
+            x = dim * (width // curr_grid_size)  # for column (vertical lines)
+            y = dim * (height // curr_grid_size)  # for row (horizontal lines)
 
             pygame.draw.line(self._screen, color, (x, 0), (x, height))
             pygame.draw.line(self._screen, color, (0, y), (width, y))
@@ -74,44 +77,47 @@ class User:
     def scale_factor_transformations(self, actual: tuple[int, int], reverse: bool = False) -> tuple[int, int]:
         """Transforms the actual location (scale factor of 1) to where it should be displayed on
         the map"""
+        h_shift = self._curr_shift[0] * (WIDTH // (self._curr_zoom * GRID_SIZE))
+        v_shift = self._curr_shift[1] * (HEIGHT // (self._curr_zoom * GRID_SIZE))
+
         if reverse:
-            return actual[0] + self._curr_shift[0], actual[1] + self._curr_shift[1]
+            return (actual[0] * self._curr_zoom + h_shift,
+                    actual[1] * self._curr_zoom + v_shift)
 
-        return actual[0] - self._curr_shift[0], actual[1] - self._curr_shift[1]
-
-    def handle_zoom_out(self) -> None:
-        """Handles key down even for zooming out
-        """
-        pass
+        return (actual[0] // self._curr_zoom - h_shift,
+                actual[1] // self._curr_zoom - v_shift)
 
     def handle_zoom_in(self) -> None:
+        """Handles key down even for zooming out
+        """
+        if self._curr_zoom != 1:
+            self._curr_zoom //= 2
+
+    def handle_zoom_out(self) -> None:
         """Handles key down even for zooming in
         """
-        pass
+        if self._curr_zoom != 4:
+            self._curr_zoom *= 2
 
     def handle_d_shift(self) -> None:
         """Handles key down even for up shift
         """
-        shift = WIDTH // GRID_SIZE
-        self._curr_shift[1] += shift
+        self._curr_shift[1] += 1
 
     def handle_u_shift(self) -> None:
         """Handles key down even for down shift
         """
-        shift = WIDTH // GRID_SIZE
-        self._curr_shift[1] -= shift
+        self._curr_shift[1] -= 1
 
     def handle_r_shift(self) -> None:
         """Handles key down even for left shift
         """
-        shift = WIDTH // GRID_SIZE
-        self._curr_shift[0] += shift
+        self._curr_shift[0] += 1
 
     def handle_l_shift(self) -> None:
         """Handles key down even for right shift
         """
-        shift = WIDTH // GRID_SIZE
-        self._curr_shift[0] -= shift
+        self._curr_shift[0] -= 1
 
     def handle_mouse_click(self, event: pygame.event.Event,
                            screen_size: tuple[int, int], ) -> None:
