@@ -102,25 +102,36 @@ class Client(User):
 
         for i in range(0, len(path) - 1):
             node = self.metro_map.get_node(path[i])
+            transform_node = self.scale_factor_transformations(node.coordinates)
 
             for neighbours in node.get_neighbours():
 
                 if neighbours.name == path[i + 1]:
                     color = node.get_color(neighbours)
-                    pygame.draw.line(surface=self._screen,
-                                     color=color,
-                                     start_pos=self.scale_factor_transformations(node.coordinates),
-                                     end_pos=self.scale_factor_transformations(neighbours.coordinates),
-                                     width=5)
+
+                    transform_neighbor = self.scale_factor_transformations(neighbours.coordinates)
+
+                    if transform_neighbor[0] <= WIDTH and transform_node[0] <= WIDTH:
+                        pygame.draw.line(surface=self._screen,
+                                         color=color,
+                                         start_pos=transform_node,
+                                         end_pos=transform_neighbor,
+                                         width=5)
 
         for node in lst:
 
+            transform_node = self.scale_factor_transformations(node.coordinates)
+
             for neighbours in node.get_neighbours():
-                pygame.draw.line(surface=self._screen,
-                                 color=THECOLORS['gray50'],
-                                 start_pos=self.scale_factor_transformations(node.coordinates),
-                                 end_pos=self.scale_factor_transformations(neighbours.coordinates),
-                                 width=3)
+
+                transform_neighbor = self.scale_factor_transformations(neighbours.coordinates)
+
+                if transform_neighbor[0] <= WIDTH and transform_node[0] <= WIDTH:
+                    pygame.draw.line(surface=self._screen,
+                                     color=THECOLORS['gray50'],
+                                     start_pos=transform_node,
+                                     end_pos=transform_neighbor,
+                                     width=3)
 
         return
 
@@ -165,7 +176,11 @@ class Client(User):
             visited = set()
 
             for node in self.metro_map.get_all_nodes('station'):
-                pygame.draw.circle(self._screen, BLACK, self.scale_factor_transformations(node.coordinates), 5)
+                transform_node = self.scale_factor_transformations(node.coordinates)
+
+                if 0 < transform_node[0] <= 800 and 0 < transform_node[1] < 800:
+                    pygame.draw.circle(self._screen, BLACK,
+                                       transform_node, 5)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -195,11 +210,16 @@ class Client(User):
             else:
                 for node in self.metro_map.get_all_nodes(''):
                     visited.add(node)
+                    transform_node = self.scale_factor_transformations(node.coordinates)
+
                     for u in node.get_neighbours():
                         if u not in visited:
-                            pygame.draw.line(self._screen, node.get_color(u),
-                                             self.scale_factor_transformations(node.coordinates),
-                                             self.scale_factor_transformations(u.coordinates), 3)
+                            transform_u = self.scale_factor_transformations(u.coordinates)
+
+                            if transform_u[0] <= WIDTH and transform_node[0] <= WIDTH:
+                                pygame.draw.line(self._screen, node.get_color(u),
+                                                 transform_node,
+                                                 transform_u, 3)
 
             self.hover_display()
 

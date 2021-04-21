@@ -59,12 +59,10 @@ class Admin(User):
                         transform_u = self.scale_factor_transformations(u.coordinates)
 
                         # avoid drawing lines over the palette. Cut it off till intercept
-                        if transform_u[0] > WIDTH or transform_node[0] > WIDTH:
-                            continue
-
-                        pygame.draw.line(self._screen, node.get_color(u),
-                                         transform_node,
-                                         transform_u, 3)
+                        if transform_u[0] <= WIDTH and transform_node[0] <= WIDTH:
+                            pygame.draw.line(self._screen, node.get_color(u),
+                                             transform_node,
+                                             transform_u, 3)
 
             draw_text(self._screen, self.is_proper_map(), 17, (10, 10))
 
