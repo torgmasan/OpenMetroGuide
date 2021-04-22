@@ -140,7 +140,7 @@ class Admin(User):
         for node in self.active_nodes:
             if in_circle(5, self.scale_factor_transformations(node.coordinates),
                          pygame.mouse.get_pos()) and node.is_station:
-                show = node.name + ' ' + str(node.coordinates)
+                show = node.name + ' ' + '(' + node.zone + ')'
                 draw_text(self._screen, show, 17,
                           (self.scale_factor_transformations(node.coordinates)[0] + 4,
                            self.scale_factor_transformations(node.coordinates)[1] - 15))
